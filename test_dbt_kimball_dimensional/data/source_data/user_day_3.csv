@@ -1,0 +1,26 @@
+batched_at,user_id,first_name,last_name,email,phone number,preferred_status,account_created_at,birthdate
+2020-01-02 10:15:12,12348,Newton,Nethercott,nnethercott0@fc2.com,308-261-7168,FALSE,2018-03-19 17:55:00,5/31/1991
+2020-01-02 10:15:13,19999,Gwendolen,Dobbson,gdobbson1@51.la,555-203-2222,TRUE,2019-07-17 19:10:12,2/22/1920
+2020-01-02 10:15:13,12560,Melissa,Bonnavant,mbonnavant2@stevedegele.com,602-838-9990,FALSE,2019-12-29 23:39:38,2/4/1984
+2020-01-01 1:35:10,12121,Chadd,Bettenay,cbettenay3@unicef.org,248-195-7305,TRUE,2019-09-25 0:41:35,5/3/1969
+2020-01-01 1:35:10,11111,Josephina,Twist,jtwist4@cbsnews.com,113-169-0115,FALSE,2019-07-05 2:56:55,4/14/1992
+2020-01-01 1:35:10,12569,Tabbatha,Kurt,tkurt5@deviantart.com,121-529-5100,TRUE,2019-09-15 18:16:49,5/28/1976
+2020-01-03 12:45:30,19821,Reggie,Lebouf,rcaunt6@tiny.cc,459-139-1439,TRUE,2019-11-03 15:44:22,7/27/2019
+2020-01-01 1:35:10,19811,Ertha,Badwick,ebadwick7@ning.com,290-215-5216,TRUE,2020-05-12 11:35:01,8/12/1840
+2020-01-01 1:35:10,19801,Lorelei,Michelet,lmichelet8@who.int,456-139-8458,FALSE,2019-06-24 13:20:59,11/21/2019
+2020-01-01 1:35:10,19342,Violette,Lane,vlane9@phpbb.com,443-374-5739,TRUE,2019-05-18 17:21:55,1/14/1981
+2020-01-01 10:15:13,99901,Egor,Francioli,efrancioli0@smh.com.au,369-504-6808,FALSE,2020-04-04 6:54:35,6/2/2019
+2020-01-02 10:15:13,84594,Caryl,Chamberlen,cchamberlen1@aol.com,237-281-7991,FALSE,2019-06-29 22:15:23,3/12/2020
+2020-01-02 10:15:12,84595,Gearard,Minihan,gminihan2@phpbb.com,437-967-5138,FALSE,2019-10-06 19:44:43,9/24/2019
+2020-01-02 10:15:12,84596,Justen,NULL,jdust3@ted.com,NULL,FALSE,2019-12-18 9:55:00,NULL
+2020-01-02 10:15:12,84597,Morty,Corryer,mcorryer4@chicagotribune.com,234-153-4312,FALSE,2019-05-20 5:02:38,9/22/2019
+2020-01-03 12:45:30,84598,Amanda,Michelet,Amichelet@who.int,456-139-8458,TRUE,2019-06-24 13:20:59,11/21/2019
+2020-01-02 10:15:12,84599,Violette,Lane,vlane9@slag.org,201-299-3627,TRUE,2019-05-18 17:21:55,1/14/2020
+2020-01-03 12:45:30,75432,Enrica,Shovelton,eshovelton0@php.net,735-488-4482,FALSE,2019-08-12 5:46:14,2/13/2020
+2020-01-03 12:45:30,75433,Rebekkah,Skelhorn,rskelhorn1@chron.com,716-516-5048,FALSE,2019-07-19 6:05:13,8/8/2019
+2020-01-03 12:45:30,75434,Jarrad,Kelby,jkelby2@nasa.gov,845-230-3393,FALSE,2019-08-03 20:48:29,5/10/2020
+2020-01-03 12:45:30,75435,Penrod,Wellum,pwellum3@shareasale.com,562-804-2680,TRUE,2019-10-10 16:43:59,7/15/2019
+2020-01-03 12:45:30,75436,Adey,Ardling,aardling4@delicious.com,429-987-8436,TRUE,2020-01-18 3:19:05,12/27/2019
+2020-01-03 12:45:30,75437,Kelwin,Tulleth,ktulleth5@prweb.com,904-731-3767,TRUE,2019-07-13 17:18:13,10/22/2019
+2020-01-03 12:45:30,75440,Allayne,Gater,agater8@buzzfeed.com,587-783-5321,FALSE,2019-10-08 17:03:39,2/23/2020
+2020-01-03 12:45:30,75441,Minne,Wollard,mwollard9@domainmarket.com,657-442-4082,FALSE,2019-08-20 0:50:18,10/9/2019

@@ -1,4 +1,4 @@
-capture_date,batched_at,user_id,first_name,last_name,email,phone number,preferred_status,account_created_at,birthdate
+capture_date,batched_at,user_id,first_name,last_name,email,phone_number,preferred_status,account_created_at,birthdate
 2020-01-01,2020-01-01 1:35:10,12348,Newton,Nethercott,nnethercott0@fc2.com,308-261-7168,TRUE,2018-03-19 17:55:00,5/31/1991
 2020-01-01,2020-01-01 1:35:10,19999,Gwendolen,Dobbson,gdobbson1@51.la,485-927-7015,TRUE,2019-07-17 19:10:12,2/22/1920
 2020-01-01,2020-01-01 1:35:10,12560,Melissa,Bonnavant,mbonnavant2@newyorker.com,602-838-9990,FALSE,2019-12-30 23:39:38,2/4/1984

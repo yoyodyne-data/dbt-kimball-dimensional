@@ -1,0 +1,2 @@
+dbt==0.17.0rc1
+pytest

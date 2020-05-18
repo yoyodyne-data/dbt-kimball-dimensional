@@ -2,6 +2,77 @@
 version: 2
 
 models:
-    - name: dim_product
+  - name: dim_user
+    description: The all-mighty user.
+    tests:
+    columns:
+      - name: first_name
+      - name: last_name
+      - name: email_address
+      - name: all_email_addresses
+      - name: phone_number
+      - name: all_phone_numbers
+      - name: is_preferred_user
+      - name: age_bracket
+      - name: birthday
+      - name: account_created_at
+      - name: all_web_event_visitor_ids
+      - name: dim_user_key
+        tests:
+          - unique
+          - not_null
+      - name: dim_user_id
+        tests:
+          - not_null
+      - name: row_effective_at
+        tests:
+          - not_null
+      - name: row_expired_at
+        tests:
+          - not_null
+      - name: row_is_current
+        tests:
+          - not_null
+          - accepted_values:
+              - values: ['TRUE','FALSE']
+      - name: natural_key
+  
+  - name: fact_sale   
+    description: > 
+      Represents each sale event at the grain of 1 row per item.
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+      - name: placed_date
+        tests:
+          - not_null
+      - name: placed_at
+        tests:
+          - not_null
+      - name: placed_timeband
+        tests:
+          - not_null
+      - name: shipped_date
+        tests:
+          - not_null
+      - name: shipped_at
+        tests:
+          - not_null
+      - name: sale_price
+        tests:
+          - not_null
+      - name: shipping_price
+        tests:
+          - not_null
+      - name: tax_price
+        tests:
+          - not_null
+      - name: dim_product_key
+        tests:
+          - not_null
+      - name: dim_user_key
+        tests:
+          - not_null
 
-    
+   

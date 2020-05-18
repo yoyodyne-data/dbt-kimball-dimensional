@@ -30,6 +30,7 @@ This hybrid SCD enables "alternate reality" lookups without any joins, which is 
 for things like unified user models. 
 
 Facts:
+- support of natural key + event date/time surrigate key lookup via macro
 - Support of incremental inserts
 - support of determenistic full refreshes
 - _stretch goal_: support of schema / SCD type changes in incremental
@@ -47,7 +48,7 @@ Models can optionally supply:
 
 
 ## Out of Scope
-- hard deletes (these need to be handled by upstream modeling / EL processes).
+- Hard deletes (these need to be handled by upstream modeling / EL processes).
 
 
 ## Test Data

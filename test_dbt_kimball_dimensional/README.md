@@ -40,6 +40,8 @@ Models will need to supply:
 \* _Note_: often we use the `current_date` as the `record_captured_at` value in batch processes; this is fine, but the "current date" when the record lands needs to be persisted in the source data sets to support a fully deterministic full refresh. 
 
 Models can optionally supply:
+- `type_0`,`type_1`,`type_4`
+- `type_10` 
 - a "beginning of time" timestamp. When not supplied defaults to January 1, 1970.
 - a "lookback window" for CDC columns to aid performance by limiting how late records can be. A lookback window of 0 indicates no support for late arriving records. 
 
@@ -58,7 +60,7 @@ This test suite covers 3 data sources and 4 final dimensional models. Each are d
 #### Web\_Event
 
 | **Mutable:**                           | False           |
-| **Change Delta Capture (CDC) Column:** | collector\_date |
+| **Change Data Capture (CDC) Column:**  | collector\_date |
 | **Durable Natural Key (DNK) Column:**  | event\_id       |
 
 This is a simplified version of a web tracker like Google Analytics or Snowplow. Events create new rows. 
@@ -67,7 +69,7 @@ No late arriving data is expected.
 #### User
 
 | **Mutable:**                           | True        |
-| **Change Delta Capture (CDC) Column:** | batched\_at |
+| **Change Data Capture (CDC) Column:**  | batched\_at |
 | **Durable Natural Key (DNK) Column:**  | user\_id    |
 
 The `User` table is created by an EL process that consolidates (matches) the live production source `User` table. No hard deletes exist in source. `batched_at` may be late arriving (ie batches do not need to arrive in order).
@@ -78,7 +80,7 @@ The `User` table is created by an EL process that consolidates (matches) the liv
 #### Order
 
 | **Mutable:**                           | True            |
-| **Change Delta Capture (CDC) Column:** | collector\_date |
+| **Change Data Capture (CDC) Column:**  | collector\_date |
 | **Durable Natural Key (DNK) Column:**  | order\_id       |
 
 
@@ -89,7 +91,7 @@ No hard deletes exist in source. `collector_date` may be late arriving (ie the c
 #### Order Item
 
 | **Mutable:**                           | False                       |
-| **Change Delta Capture (CDC) Column:** | collector\_date             |
+| **Change Data Capture (CDC) Column:**  | collector\_date             |
 | **Durable Natural Key (DNK) Column:**  | collector\_date + order\_id |
 
 The `Order Item` table is created by an EL process that creates a new immutable row every time a change is detected. 

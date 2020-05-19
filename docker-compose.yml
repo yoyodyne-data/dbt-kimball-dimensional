@@ -4,6 +4,8 @@ services:
   test_dbt_kimball_dimensional_postgres:
     image: postgres:12
     hostname: test_dbt_kimball_dimensional_postgres
+    ports:
+        - "5432:5432"
     environment:
       POSTGRES_PASSWORD: testkimball
       POSTGRES_USER: testkimball

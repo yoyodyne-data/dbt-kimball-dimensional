@@ -17,25 +17,26 @@ class SchemaTestResult:
     name: str
     success: bool   
 
-@pytest.fixture
-def assert_no_deltas():
+def assert_no_deltas(day:int):
     conn = create_engine(f"postgres://testkimball:testkimball@test_dbt_kimball_dimensional_postgres/testkimball")
     for table in ('DIM_USER','DIM_PRODUCT','FACT_SALE','FACT_RETURN',):
         sql = f""" WITH
                   expected AS (
-                    SELECT * FROM {table}_DAY_1
-                  MINUS
+                    SELECT * FROM {table}_DAY_{day}
+                  EXCEPT
                     SELECT * FROM {table}
                   )
                   ,actual AS (
                     SELECT * FROM {table}
-                  MINUS
-                    SELECT * FROM {table}_DAY_1
+                  EXCEPT
+                    SELECT * FROM {table}_DAY_{day}
                   )
                   SELECT * FROM expected
                     UNION
                   SELECT * FROM actual """             
         result = conn.execute(sql)
+        assert len(result) == 0 ,f"{table} had deltas: {result}"
+        
         
 
     

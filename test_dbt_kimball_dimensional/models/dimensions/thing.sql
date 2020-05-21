@@ -6,9 +6,10 @@ source_data AS (
 )
 ,slowly_changing_dimensions_with_duplicates AS (
    SELECT 
-
+	NULL AS {{this.table}}_key
+	,NULL AS {{this.table}}_id
 	-- type 0
-	LAST_VALUE(account_created_at) OVER w AS account_created_at
+	,LAST_VALUE(account_created_at) OVER w AS account_created_at
 	
 	-- type 1
 	,FIRST_VALUE(email) OVER w AS current_email_address
@@ -50,9 +51,18 @@ deduplicated_aggregates AS (
 	,unnest(all_email_addresses) as item
    GROUP BY 1
 )
+,durable_ids AS (
+  SELECT
+    natural_key
+    ,ROW_NUMBER() OVER() AS {{this.table}}_id
+  FROM slowly_changing_dimensions_with_duplicates
+  GROUP BY 1
+)
 ,slowly_changing_dimensions AS (
 SELECT 
-   scd.natural_key
+   ROW_NUMBER() OVER() AS {{this.table}}_key
+   ,durable_ids.{{this.table}}_id
+   ,scd.natural_key
    ,scd.first_name
    ,scd.last_name
    ,email
@@ -67,8 +77,11 @@ SELECT
    ,scd.current_email_address
 FROM 
 slowly_changing_dimensions_with_duplicates scd
-LEFT JOIN
+JOIN
 deduplicated_aggregates dedupe
+USING (natural_key)
+JOIN
+durable_ids
 USING (natural_key)
 )
 

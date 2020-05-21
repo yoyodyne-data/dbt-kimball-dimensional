@@ -36,9 +36,6 @@ def assert_no_deltas(day:int):
                   SELECT * FROM actual """             
         result = conn.execute(sql)
         assert len(result) == 0 ,f"{table} had deltas: {result}"
-        
-        
-
     
 def run_day(day:int):
     ## runs all the models for a given day as datasets
@@ -78,7 +75,6 @@ def run_schema_test():
     return test_results
 
 def collect_a_day(day):
-    conn=get_conn()
     run_args, models = run_a_day(day)
     for model in models:
         assert model.success, f"model {model.name} failed with error message: {model.error_message}."
@@ -88,7 +84,9 @@ def collect_a_day(day):
 
 def test_day_one():
     collect_a_day(1)
+    assert_no_deltas(1)
 
-
-
+#def test_day_two():
+#    collect_a_day(2)
+#    assert_no_deltas(2)
 

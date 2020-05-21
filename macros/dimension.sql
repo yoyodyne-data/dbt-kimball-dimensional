@@ -10,11 +10,27 @@
     {%- set type_4_columns = config.get('type_4',[]) -%}
     {%- set type_10_columns = config.get('type_10',[]) -%}
     {%- set beginning_of_time = config.get('beginning_of_time','1970-01-01') -%}
-    {%- set lookback_window = config.get('lookback_window',0) -%}
 
+
+    {{ run_hooks(pre_hooks, inside_transaction=False) }}
  
     {%- set target = adapter.get_relation(this) -%}
-    {{ run_hooks(pre_hooks) }}
+    -- BEGIN 
+    {{ run_hooks(pre_hooks, inside_transaction=True) }}
+    
+    --fresh build
+    
+    {%- if target is none or full_refresh -%}
+	{%- set :wq
+
+
+
+
+
+
+
+
+
 
     WITH 
     new_records AS (
@@ -22,6 +38,7 @@
     -- fresh build, get all the records
             
     {%- else -%}
+	
     -- get CDC records 
 
     {%- endif -%}

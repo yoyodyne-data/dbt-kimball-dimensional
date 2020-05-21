@@ -37,15 +37,15 @@ Facts:
 
 Models will need to supply:
 - a durable natural key (DNK) column (single or compound).
-- a change delta capture (CDC) column to indicate the transform window.\*
+- a change data capture (CDC) column to indicate the transform window.\*
 \* _Note_: often we use the `current_date` as the `record_captured_at` value in batch processes; this is fine, but the "current date" when the record lands needs to be persisted in the source data sets to support a fully deterministic full refresh. 
 
 Models can optionally supply:
-- `type_0`,`type_1`,`type_4`
-- `type_10` 
-- a "beginning of time" timestamp. When not supplied defaults to January 1, 1970.
-- a "lookback window" for CDC columns to aid performance by limiting how late records can be. A lookback window of 0 indicates no support for late arriving records. 
-
+- `type_0`,`type_1`,`type_4` slowly changing dimension column names
+- `type_10` slowly changing dimension object with params:
+    - `type_2_column` with the name of the column to update via type 2
+    - `mini_dimension_column` with the name of the column to aggregate the values of `type_2_column`
+- a `beginning_of_time` timestamp. When not supplied defaults to January 1, 1970.
 
 ## Out of Scope
 - Hard deletes (these need to be handled by upstream modeling / EL processes).
@@ -70,7 +70,7 @@ No late arriving data is expected.
 #### User
 
 | **Mutable:**                           | True        |
-| **Change Data Capture (CDC) Column:**  | batched\_at |
+| **Change Data Capture (CDC) Column:**  | updated\_at |
 | **Durable Natural Key (DNK) Column:**  | user\_id    |
 
 The `User` table is created by an EL process that consolidates (matches) the live production source `User` table. No hard deletes exist in source. `batched_at` may be late arriving (ie batches do not need to arrive in order).
@@ -81,12 +81,12 @@ The `User` table is created by an EL process that consolidates (matches) the liv
 #### Order
 
 | **Mutable:**                           | True            |
-| **Change Data Capture (CDC) Column:**  | collector\_date |
+| **Change Data Capture (CDC) Column:**  | updated\_date   |
 | **Durable Natural Key (DNK) Column:**  | order\_id       |
 
 
 The `Order` table is created by an EL process that consolidates (matches) the live production `Order` table. 
-No hard deletes exist in source. `collector_date` may be late arriving (ie the collector can not arrive out of order).
+No hard deletes exist in source. `updated_date` may be late arriving (ie the records can arrive out of order).
 
 
 #### Order Item
@@ -97,7 +97,7 @@ No hard deletes exist in source. `collector_date` may be late arriving (ie the c
 
 The `Order Item` table is created by an EL process that creates a new immutable row every time a change is detected. 
 Each order item record is an immutable event representing a change (either a new record or updated record).
-No hard deletes exist in source. `collector_date` may be late arriving (ie the collector can be delayed and ship out-of-order. 
+No hard deletes exist in source. `collector_date` may be late arriving (ie the collector can be delayed and ship out-of-order). 
 
 ### Dimensions
 

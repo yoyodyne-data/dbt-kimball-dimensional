@@ -13,6 +13,7 @@ services:
 
   test_kimball:
     image: test_kimball
+    container_name: test_kimball
     working_dir: /app
     environment:
       PATH: "/app:${PATH}"

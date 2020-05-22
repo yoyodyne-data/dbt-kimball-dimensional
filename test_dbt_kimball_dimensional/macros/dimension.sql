@@ -3,6 +3,10 @@
     #}*/
     
 
+    {{ run_hooks(pre_hooks, inside_transaction=False) }}
+ 
+    {%- set target_relation = this -%}
+    {%- set existing_relation = adapter.get_relation(this.database, this.schema, this.name) -%}
 
     {%- set DNI = config.require('durable_natural_id') -%}
     {%- set CDC = config.require('change_data_capture') -%}
@@ -16,7 +20,8 @@
 
     {%- set has_aggregates = type_4_columns + type_10_columns -%}
 
-    {%- set config_args= {"DNI":DNI,
+    {%- set config_args= {"sql":sql,
+			  "DNI":DNI,
 			  "CDC":CDC,
 			  "full_refresh":full_refresh,
 			  "type_0_columns":type_0_columns,
@@ -24,12 +29,10 @@
 			  "type_4_columns":type_4_columns,
 			  "type_10_columns":type_10_columns,
 			  "beginning_of_time":beginning_of_time,
-			  "lookback_window":lookback_window} -%}
+			  "lookback_window":lookback_window,
+			  "target_exists": existing_relation is not none} -%}
 
-    {{ run_hooks(pre_hooks, inside_transaction=False) }}
- 
-    {%- set target_relation = this -%}
-    {%- set existing_relation = adapter.get_relation(this.database, this.schema, this.name) -%}
+
     -- BEGIN 
     {{ run_hooks(pre_hooks, inside_transaction=True) }}
 
@@ -39,73 +42,15 @@
     {% do adapter.drop_relation(backup_relation) %}
     {% do adapter.rename_relation(target_relation, backup_relation) %}
 
-
-    -- stub table to get us the column names from the CTE
-    {% set stub_sql %}
-	WITH __dbt_kimball_dimensional_stub AS (
-	 {{ sql }} 
-	)
-	SELECT * FROM __dbt_kimball_dimensional_stub LIMIT 0
-    {% endset %}
-    {% set structure = run_query(stub_sql) %}
-    {% set target_columns = structure.column_names %}
     {% set target_columns = _get_columns_from_query(sql)  %}
 
-    {% set source_cte %} 
-      WITH 
-      __dbt_kimball_dimensional_source AS (
-	WITH 
-	_base_source AS (	
-	  {{sql}}
-	)	
-      {%- if existing_relation and not full_refresh -%}
-        ,_target_max AS (
-	   SELECT 
-	     MAX( {{ config_args['CDC'] }} ) as max_cdc	
-	   FROM
-	     {{ this }} 
-	)
-	,_final_source AS (
-	   SELECT
-	      *
-	   FROM 
-	     _base_source
-	   WHERE
-	    {{ config_args["CDC"] }} > (SELECT max_cdc FROM target_max)
-        {%- if lookback_window -%}
-	    + INTERVAL '-{{ lookback_window }} days'
-	   AND 
-	   {{ xdb.hash([ '_base_source.' ~ CDC, '_base_source.' ~ DNI ]) }} 
-	   NOT IN
-       	   (SELECT 	
-	   {{ xdb.hash([ this ~ '.' ~ CDC, this ~ '.' ~ DNI ]) }} 
-           FROM 
-             {{ this }} 
-	   WHERE 
-	     {{ config_args["CDC"] }} > (SELECT max_cdc FROM target_max) 
-	    + INTERVAL '-{{ lookback_window }} days'
-            )
-	{%- endif -%}
-      {%- else -%}
-        ,_final_source AS (
-           SELECT 
-	     *
-	   FROM
-	     _base_source
-        )
-      {%- endif -%} 
-      SELECT 
-	  *
-      FROM 
-         _final_source
-    )
-    {% endset %}
+    {% set source_cte = _kimball_source_cte(config_args) %} 
 
     {% set slowly_changing_dimension_body  %}
 	__dbt_kimball_dimensional_slowly_changing_dimensions_with_duplicates AS (
    	SELECT 
-	   NULL AS {{this.table}}_key
-	   ,NULL AS {{this.table}}_id
+	   {{this.table}}_key
+	   ,{{this.table}}_id
 	-- type 0 
         {% for col in config_args["type_0_columns"] %}
 	   ,LAST_VALUE( {{col}} ) OVER natural_key_window AS {{col}}

@@ -39,6 +39,7 @@
     {% do adapter.drop_relation(backup_relation) %}
     {% do adapter.rename_relation(target_relation, backup_relation) %}
 
+
     -- stub table to get us the column names from the CTE
     {% set stub_sql %}
 	WITH __dbt_kimball_dimensional_stub AS (
@@ -48,6 +49,7 @@
     {% endset %}
     {% set structure = run_query(stub_sql) %}
     {% set target_columns = structure.column_names %}
+    {% set target_columns = _get_columns_from_query(sql)  %}
 
     {% set source_cte %} 
       WITH 

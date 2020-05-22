@@ -1,26 +1,27 @@
-{%- macro _kimball_source_cte(config_args) -%}
+{%- macro _kimball_source_query(config_args) -%}
    /*{# The query partial that defines our "source", ie records to be operated on.
         ARGS:
           - config_args (dict) an object containing the full materialization args set.
         RETURNS: the CTE partial `__dbt_kimball_dimensional_source`.
    #}*/
-      WITH 
-      __dbt_kimball_dimensional_source AS (
-	WITH 
-	_base_source AS (	
-	  {{ config_args["sql"] }}
-	)	
+
+    {%- set dim_id = this.table ~ '_id' -%}
+    {%- set dim_key = this.table ~ '_key' -%}
+   WITH 
+   _base_source AS (	
+     {{ config_args["sql"] }}
+   )	
       {%- if config_args["target_exists"] and not config_args["full_refresh"] -%}
         ,_target_max AS (
 	   SELECT 
 	     MAX( {{ config_args['CDC'] }} ) as max_cdc	
 	   FROM
-	     {{ this }} 
+	      {{ config_args["backup_relation"] }}
 	)
 	,_from_source AS (
 	   SELECT
-	     NULL AS {{this.table}}_key
-	     ,NULL AS {{this.table}}_id
+	     NULL::numeric AS {{ dim_key }}
+	     ,NULL::numeric AS {{ dim_id }}
 	      *
 	   FROM 
 	     _base_source
@@ -34,9 +35,9 @@
 	   {{ xdb.hash([ '_base_source.' ~ CDC, '_base_source.' ~ DNI ]) }} 
 	   NOT IN
        	   (SELECT 	
-	   {{ xdb.hash([ this ~ '.' ~ CDC, this ~ '.' ~ DNI ]) }} 
+	   {{ xdb.hash([ CDC,DNI ]) }} 
            FROM 
-             {{ this }} 
+	      {{ config_args["backup_relation"] }}
 	   WHERE 
 	     {{ config_args["CDC"] }} > 
 	     {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM target_max)') }}
@@ -49,7 +50,7 @@
 	   SELECT
 	      *
 	   FROM
-	      {{ this }} 
+	      {{ config_args["backup_relation"] }}
 	   WHERE {{ config_args["DNI"] }} IN (SELECT {{ config_args["DNI"] }} FROM _final_source )
 	)
 	,_final_source AS (
@@ -65,8 +66,8 @@
       {%- else -%}
         ,_final_source AS (
            SELECT 
-	   NULL AS {{ (this.table) }}_key
-	   ,NULL AS {{ (this.table) }}_id
+	     NULL::numeric AS {{ dim_key }}
+	     ,NULL::numeric AS {{ dim_id }}
 	     ,*
 	   FROM
 	     _base_source
@@ -76,5 +77,5 @@
 	  *
       FROM 
          _final_source
-    )
+
 {%- endmacro -%}

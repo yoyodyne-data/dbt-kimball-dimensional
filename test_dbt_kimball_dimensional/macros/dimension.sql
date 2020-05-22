@@ -17,7 +17,8 @@
     {%- set type_10_columns = config.get('type_10',default=[]) -%}
     {%- set beginning_of_time = config.get('beginning_of_time',default='1970-01-01') -%}
     {%- set lookback_window = config.get('lookback_window',default=none) -%}
-
+    {% set backup_identifier = existing_relation.identifier ~ "__dbt_kimball_backup" %}
+    {% set backup_relation = existing_relation.incorporate(path={"identifier": backup_identifier}) %}   
 
     {% set target_columns = _get_columns_from_query(sql)  %}
 
@@ -32,6 +33,7 @@
 			  "beginning_of_time":beginning_of_time,
 			  "lookback_window":lookback_window,
 			  "target_columns":target_columns,
+			  "backup_relation":backup_relation,
 			  "target_exists": existing_relation is not none} -%}
 
 
@@ -39,15 +41,13 @@
     {{ run_hooks(pre_hooks, inside_transaction=True) }}
 
     -- Drop existing backup and move existing target to backup
-    {% set backup_identifier = existing_relation.identifier ~ "__dbt_kimball_backup" %}
-    {% set backup_relation = existing_relation.incorporate(path={"identifier": backup_identifier}) %}   
     {% do adapter.drop_relation(backup_relation) %}
     {% do adapter.rename_relation(target_relation, backup_relation) %}
 
     {% set target_columns = _get_columns_from_query(sql)  %}
 
-    {% set slowly_changing_dimension_body = _kimball_scd_body_cte(config_args, 
-							          _kimball_source_cte(config_args) )  %}
+    {% set slowly_changing_dimension_body = _kimball_scd_body(config_args, 
+							          _kimball_source_query(config_args) )  %}
 
 {% call statement('main') %}
 	{{ create_table_as(False,

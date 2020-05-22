@@ -1,4 +1,4 @@
-{%- macro _kimball_scd_body_cte(config_args, source_cte) -%}
+{%- macro _kimball_scd_body(config_args, source_cte) -%}
   /*{# Partial chain of CTEs that produces the final slowly changing dimensions dataset.
        ARGS:
 	- config_args (dict) the full set of materialization config arguments.
@@ -6,13 +6,16 @@
        RETURNS: the combined SQL cte stack to generate the executable sql.
     #}*/
     {%- set has_aggregates = config_args['type_4_columns'] + config_args['type_10_columns'] -%}
-	
-	{{ source_cte }}
-	
+    {%- set dim_id = this.table ~ '_id' -%}
+    {%- set dim_key = this.table ~ '_key' -%}
+ 	WITH
+	__dbt_kimball_dimensional_source AS (
+	   {{ source_cte }}
+        )	
 	,__dbt_kimball_dimensional_slowly_changing_dimensions_with_duplicates AS (
    	SELECT 
-	   {{ this.table }}_key
-	   ,{{ this.table }}_id
+	   {{ dim_key }}
+	   ,{{ dim_id }}
 	-- type 0 
         {% for col in config_args["type_0_columns"] %}
 	   ,LAST_VALUE( {{col}} ) OVER natural_key_window AS {{col}}
@@ -65,16 +68,40 @@
     {% endif %}
 
     ,__dbt_kimball_dimensional_durable_ids AS (
+       WITH 
+       max_existing_id AS (
+       {%- if config_args["target_exists"] and not config_args["full_refresh"] -%}
+	  SELECT
+	    MAX( {{ dim_id }} ) FROM {{ config_args["backup_relation"] }}
+       {%- else -%}
+          SELECT
+	      0 
+       {%- endif -%}
+          AS max_existing_id
+       )
+       ,row_numbers AS (
+          SELECT
+          {{ config_args["DNI"] }}
+          , ROW_NUMBER() OVER() AS id_increment
+          FROM __dbt_kimball_dimensional_slowly_changing_dimensions_with_duplicates
+          GROUP BY 1
+       )
        SELECT
-       {{ config_args["DNI"] }}
-       ,ROW_NUMBER() OVER() AS {{this.table}}_id
-       FROM __dbt_kimball_dimensional_slowly_changing_dimensions_with_duplicates
-       GROUP BY 1
+          row_numbers.{{ config_args["DNI"] }}
+	  ,COALESCE( duplicates.{{ dim_id }}, max_existing_id + id_increment) AS {{ dim_id }}
+       FROM 
+         row_numbers 
+       LEFT JOIN
+         __dbt_kimball_dimensional_slowly_changing_dimensions_with_duplicates duplicates
+       USING ( {{ config_args["DNI"] }} )    
+       INNER JOIN
+         max_existing_id
+       ON 1=1
     )
     ,__dbt_kimball_dimensional_slowly_changing_dimensions AS (
     SELECT 
-       ROW_NUMBER() OVER() AS {{this.table}}_key
-       ,durable_ids.{{this.table}}_id
+       COALESCE( {{ dim_key }}, ROW_NUMBER() OVER() ) AS {{ dim_key }}
+       ,durable_ids.{{ dim_id }}
        {% for col in config_args["type_4_columns"] + config_args["type_10_columns"] %}
 	, deduped.all_{{ col }}_values AS all_{{ col }}_values
        {% endfor %}

@@ -2,6 +2,8 @@
     /*{# builds a Kimball incremental dimension with type 0,1,2 and 10 dims.
     #}*/
     
+
+
     {%- set DNI = config.require('durable_natural_id') -%}
     {%- set CDC = config.require('change_data_capture') -%}
     {% set full_refresh = flags.FULL_REFRESH %}
@@ -14,12 +16,28 @@
 
     {%- set has_aggregates = type_4_columns + type_10_columns -%}
 
+    {%- set config_args= {"DNI":DNI,
+			  "CDC":CDC,
+			  "full_refresh":full_refresh,
+			  "type_0_columns":type_0_columns,
+			  "type_1_columns":type_1_columns,
+			  "type_4_columns":type_4_columns,
+			  "type_10_columns":type_10_columns,
+			  "beginning_of_time":beginning_of_time,
+			  "lookback_window":lookback_window} -%}
+
     {{ run_hooks(pre_hooks, inside_transaction=False) }}
  
     {%- set target_relation = this -%}
     {%- set existing_relation = adapter.get_relation(this.database, this.schema, this.name) -%}
     -- BEGIN 
     {{ run_hooks(pre_hooks, inside_transaction=True) }}
+
+    -- Drop existing backup and move existing target to backup
+    {% set backup_identifier = existing_relation.identifier ~ "__dbt_kimball_backup" %}
+    {% set backup_relation = existing_relation.incorporate(path={"identifier": backup_identifier}) %}   
+    {% do adapter.drop_relation(backup_relation) %}
+    {% do adapter.rename_relation(target_relation, backup_relation) %}
 
     -- stub table to get us the column names from the CTE
     {% set stub_sql %}
@@ -41,7 +59,7 @@
       {%- if existing_relation and not full_refresh -%}
         ,_target_max AS (
 	   SELECT 
-	     MAX( {{ CDC }} ) as max_cdc
+	     MAX( {{ config_args['CDC'] }} ) as max_cdc	
 	   FROM
 	     {{ this }} 
 	)
@@ -78,6 +96,7 @@
 	  *
       FROM 
          _final_source
+    )
     {% endset %}
 
     {% set slowly_changing_dimension_body  %}
@@ -183,8 +202,7 @@
   {% endcall %}
  
   {% do adapter.commit() %}
-
-
+  {% do adapter.drop_relation(backup_relation) %}
   {{ run_hooks(post_hooks) }}
   
   {{ return({'relations': [target_relation]}) }}

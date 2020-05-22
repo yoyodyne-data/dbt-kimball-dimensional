@@ -126,7 +126,7 @@
 	{% endfor %}
 
 	,CASE WHEN LAST_VALUE( {{ config_args["CDC"] }} ) over natural_key_window = {{ CDC }}
-	THEN '{{ beginning_of_time }}'
+	THEN '{{ config_args["beginning_of_time"] }}' 
 	ELSE {{ CDC }}
 	END AS row_effective_at
 	,( LAG( {{ CDC }}, 1, '9999-12-31') over natural_key_window ) + interval '-1 second' AS row_expired_at

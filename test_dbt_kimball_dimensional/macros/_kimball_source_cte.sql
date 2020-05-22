@@ -65,8 +65,8 @@
       {%- else -%}
         ,_final_source AS (
            SELECT 
-	     NULL AS {{this.table}}_key
-	     ,NULL AS {{this.table}}_id
+	   NULL AS {{ (this.table) }}_key
+	   ,NULL AS {{ (this.table) }}_id
 	     ,*
 	   FROM
 	     _base_source

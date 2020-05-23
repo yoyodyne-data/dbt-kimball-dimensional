@@ -45,8 +45,7 @@
     -- BEGIN 
     {{ run_hooks(pre_hooks, inside_transaction=True) }}
 
-    {%- if not config_args["target_exists"] -%}
-
+    {%- if existing_relation is none -%}
         {% call statement('main') %}
             {{ create_table_as(False,
                                target_relation,
@@ -60,13 +59,14 @@
         {%- set backup_relation = load_relation(backup_relation) -%}
         {%- if backup_relation is not none -%}        
             {% do adapter.drop_relation(backup_relation) %}
-            {% do adapter.rename_relation(target_relation, backup_relation) %}
         {%- endif -%}
+
+        {% do adapter.rename_relation(target_relation, backup_relation) %}
        
         {% call statement('main') %}
             {{ create_table_as(False,
                                target_relation,
-                               slowly_changing_dimension_body) }}
+                               _build_kimball_dimension(config_args)) }}
         {% endcall %}
 
     {%- else -%}

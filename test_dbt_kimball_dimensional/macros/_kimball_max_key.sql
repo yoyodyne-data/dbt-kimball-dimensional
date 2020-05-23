@@ -35,9 +35,9 @@
         {{ config_args["dim_key"] }} 
     {%- endif %} 
         ,durable_ids.{{ config_args["dim_id"] }}
-    {%- for col in array_columns -%}
+    {% for col in config_args["type_10_columns"] -%}
         ,deduped.all_{{ col }}_values AS all_{{ col }}_values
-    {% endfor -%}
+    {% endfor %}
     {% for col in config_args["model_query_columns"] -%}
         ,scd.{{ col }} AS {{ col }}
     {%- endfor %}
@@ -46,7 +46,7 @@
         ,scd.row_is_current
     FROM   
        {{ duplicates_cte }} scd
-    {% if array_columns %}
+    {% if config_args["type_10_columns"]  %}
     JOIN
         {{ deduped_aggregates_cte }} deduped
     USING 

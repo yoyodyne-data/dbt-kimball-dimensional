@@ -2,14 +2,14 @@
     
     SELECT
     {{ config_args["DNI"] }}
-    {%- for col in config_args["type_10_columns"] -%}
-        ,ARRAY_AGG(DISTINCT {{ col }}__item) AS {{ col }} 
-    {%- endfor -%}
+    {% for col in config_args["type_10_columns"] -%}
+        ,ARRAY_AGG(DISTINCT {{ col }}__item) AS all_{{ col }}_values
+    {%- endfor %}
     FROM 
         {{ duplicates_cte }} 
-    {%- for col in config_args["type_10_columns"] -%}
-    ,unnest( {{ col }} ) as {{ col }}__item
-    {%- endfor -%}
+    {% for col in config_args["type_10_columns"] -%}
+    ,unnest( all_{{ col }}_values ) as {{ col }}__item
+    {%- endfor %}
     GROUP BY 1
 
 {%- endmacro -%}

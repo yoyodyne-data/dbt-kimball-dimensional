@@ -5,11 +5,10 @@
         max_existing_id AS (
             SELECT
         {% if incremental -%}
-                MAX( {{ config_args["dim_id"] }} ) FROM {{ config_args["existing_relation"] }}
+                MAX( {{ config_args["dim_id"] }} ) AS max_existing_id FROM {{ config_args["existing_relation"] }}
         {% else -%}
-     		0 
+     		0 AS max_existing_id
         {%- endif %}
-            AS max_existing_id
         )
         ,row_numbers AS (
             SELECT
@@ -22,7 +21,7 @@
         SELECT
             row_numbers.{{ config_args["DNI"] }} AS {{ config_args["DNI"] }}
             ,COALESCE(duplicates.{{ config_args["dim_id"] }}, 
-                      max_existing_id + id_increment) AS {{ config_args["dim_id"] }}
+                      max_existing_id.max_existing_id + id_increment) AS {{ config_args["dim_id"] }}
         FROM 
             row_numbers 
         LEFT JOIN

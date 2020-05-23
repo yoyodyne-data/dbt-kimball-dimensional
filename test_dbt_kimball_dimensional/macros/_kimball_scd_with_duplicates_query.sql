@@ -13,13 +13,13 @@
         ,FIRST_VALUE( {{col}} ) OVER natural_key_window AS {{col}}
     {%- endfor -%}
 
-    -- type 4 + 10
-    {% for col in config_args["type_4_columns"] + config_args["type_10_columns"] -%}
+    -- type 10
+    {% for col in config_args["type_10_columns"] -%}
         ,array_agg( {{col}} ) OVER (PARTITION BY {{ config_args["DNI"] }}) AS all_{{col}}_values
     {%- endfor -%}
     
     {% for col in config_args["model_query_columns"] -%}
-        {%- if col not in config_args["type_0_columns"] + config_args["type_1_columns"] + config_args["type_4_columns"] -%}
+        {%- if col not in config_args["type_0_columns"] + config_args["type_1_columns"] -%}
         ,{{ col }} 
         {%- endif -%}
     {%- endfor -%}

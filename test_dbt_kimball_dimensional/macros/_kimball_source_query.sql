@@ -40,7 +40,7 @@
                     {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM target_max)') }}
                 ) 
             {%- else -%}
-                (SELECT max_cdc FROM target_max) 
+                (SELECT max_cdc FROM _target_max) 
             {%- endif -%}
         )
         ,_from_target AS (
@@ -56,11 +56,25 @@
         )
         ,_final_source AS (
             SELECT 
-                * 
+                *
             FROM 
-                (SELECT * FROM _from_source
+		(SELECT 
+		    {{ config_args["dim_key"] }}
+		    ,{{ config_args["dim_id"] }}
+		{% for col in config_args['model_query_columns'] %}
+		    ,{{ col }}
+		{% endfor %}
+		FROM
+		   _from_source
                     UNION ALL
-                SELECT * FROM _from_target) unioned
+	        SELECT 
+		    {{ config_args["dim_key"] }}
+		    ,{{ config_args["dim_id"] }}
+		{% for col in config_args['model_query_columns'] -%}
+		    ,{{ col }}
+		{% endfor %}
+		FROM
+		   _from_target) unioned
         )
     {%- else -%}
         ,_final_source AS (

@@ -9,21 +9,22 @@
 
     {{ run_hooks(pre_hooks, inside_transaction=False) }}
  
-    {%- set target_relation = this -%}
-    {%- set existing_relation = load_relation(this) -%}
+    {% set target_relation = this %}
+    {% set existing_relation = load_relation(this) %}
 
-    {%- set CDC = config.require('change_data_capture') -%}
+    {% set CDC = config.require('change_data_capture') %}
 
     {% set model_query_columns, model_query_data_types = _get_columns_from_query(sql)  %}
-    {%- for col in model_query_columns -%}
-        {%- if col == CDC -%}
-            {%- set cdc_data_type = model_query_data_types[loop.index0] -%}
-        {%- endif -%}
-    {%- endfor  -%}
+    {% for col in model_query_columns %}
+        {% if col == CDC %}
+            {% set cdc_data_type = model_query_data_types[loop.index0] %}
+        {% endif %}
+    {% endfor  %}
 
-    -- TODO: rename target_columns key to model_query_columns
 
-    {%- set config_args= {
+	
+
+    {% set config_args= {
               "sql" : sql,
               "dim_key" : this.table ~ '_key',
               "dim_id" : this.table ~ '_id',
@@ -33,33 +34,29 @@
               "full_refresh" : flags.FULL_REFRESH,
               "type_0_columns" : config.get('type_0',default=[]),
               "type_1_columns" : config.get('type_1',default=[]),
-              "type_4_columns" : config.get('type_4',default=[]),
               "type_10_columns" : config.get('type_10',default=[]),
               "indexes" : config.get('indexes',default=[dim_key,dim_id]), 
               "beginning_of_time" : config.get('beginning_of_time',default='1970-01-01'),
               "lookback_window" : config.get('lookback_window',default=0),
               "model_query_columns" : model_query_columns, 
-              "existing_relation" : existing_relation} -%}
-
+              "existing_relation" : existing_relation} %}
 
     -- BEGIN 
     {{ run_hooks(pre_hooks, inside_transaction=True) }}
 
-    {%- if existing_relation is none -%}
+    {% if existing_relation is none %}
         {% call statement('main') %}
             {{ create_table_as(False,
                                target_relation,
                                _build_kimball_dimension(config_args)) }}
         {% endcall %}
 
-    {%- elif config_args["full_refresh"] -%}
+    {% elif config_args["full_refresh"] %}
 
-        {%- set backup_relation = this.incorporate(
-                path={"identifier": target_relation.identifier ~ "__dbt_kimball_backup"} ) -%}
-        {%- set backup_relation = load_relation(backup_relation) -%}
-        {%- if backup_relation is not none -%}        
-            {% do adapter.drop_relation(backup_relation) %}
-        {%- endif -%}
+        {% set backup_relation = this.incorporate(
+                path={"identifier": target_relation.identifier ~ "__dbt_kimball_backup"} ) %}
+        {% set backup_relation = load_relation(backup_relation) %}
+        {% do drop_relation_if_exists(backup_relation) %}
 
         {% do adapter.rename_relation(target_relation, backup_relation) %}
        
@@ -69,9 +66,20 @@
                                _build_kimball_dimension(config_args)) }}
         {% endcall %}
 
-    {%- else -%}
-        --thing
-    {%- endif -%}
+    {% else %}
+        {% set temp_relation = make_temp_relation(this) %}
+        {% call statement('temp') %}
+            {{ create_table_as(True,
+                               temp_relation,
+                               _build_kimball_dimension(config_args)) }}
+        {% endcall %}
+        {% call statement('main') %}
+           {{ incremental_upsert(temp_relation,
+                                 target_relation,
+                                 config_args["dim_key"]) }}
+        {% endcall %}
+
+    {% endif %}
 
   {% do adapter.commit() %}
   {{ run_hooks(post_hooks) }}

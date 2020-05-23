@@ -7,25 +7,35 @@
         {% if incremental -%}
                 MAX( {{ config_args["dim_id"] }} ) AS max_existing_id FROM {{ config_args["existing_relation"] }}
         {% else -%}
-     		0 AS max_existing_id
+            0 AS max_existing_id
         {%- endif %}
+        )
+        ,mixed_state_dim_ids AS (
+            SELECT
+                {{ config_args["DNI"] }} AS {{ config_args["DNI"] }}
+                ,MAX( {{ config_args["dim_id"] }} ) AS {{ config_args["dim_id"] }} 
+            FROM
+                {{ duplicates_cte }}
+            GROUP BY 1
         )
         ,row_numbers AS (
             SELECT
                 {{ config_args["DNI"] }}
                 , ROW_NUMBER() OVER() AS id_increment
             FROM 
-                {{ duplicates_cte }}
+                mixed_state_dim_ids
+            WHERE
+                {{ config_args["dim_id"] }} IS NULL    
             GROUP BY 1
         )    
         SELECT
-            row_numbers.{{ config_args["DNI"] }} AS {{ config_args["DNI"] }}
-            ,COALESCE(duplicates.{{ config_args["dim_id"] }}, 
+            mixed_state_dim_ids.{{ config_args["DNI"] }} AS {{ config_args["DNI"] }}
+            ,COALESCE(mixed_state_dim_ids.{{ config_args["dim_id"] }}, 
                       max_existing_id.max_existing_id + id_increment) AS {{ config_args["dim_id"] }}
         FROM 
-            row_numbers 
+            mixed_state_dim_ids
         LEFT JOIN
-            {{ duplicates_cte }} duplicates
+            row_numbers
         USING ( {{ config_args["DNI"] }} )    
         INNER JOIN
             max_existing_id

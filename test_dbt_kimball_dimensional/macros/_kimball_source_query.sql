@@ -66,7 +66,7 @@
 		{% endfor %}
 		FROM
 		   _from_source
-                    UNION ALL
+                    UNION
 	        SELECT 
 		    {{ config_args["dim_key"] }}
 		    ,{{ config_args["dim_id"] }}

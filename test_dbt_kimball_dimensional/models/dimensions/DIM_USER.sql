@@ -5,5 +5,5 @@
 SELECT
    *
 FROM 
-  prod_source.user_total_replay
+  prod_source.user_day_{{ var('day') }}
 

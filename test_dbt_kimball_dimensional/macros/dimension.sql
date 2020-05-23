@@ -52,11 +52,11 @@
 
     {% elif config_args["full_refresh"] %}
 
-        {% set backup_relation = this.incorporate(
+        {% set backup_relation = existing_relation.incorporate(
                 path={"identifier": target_relation.identifier ~ "__dbt_kimball_backup"} ) %}
-        {% set backup_relation = load_relation(backup_relation) %}
-        {% do drop_relation_if_exists(backup_relation) %}
-
+	{% if load_relation(backup_relation) is not none %}
+	    {% do adapter.drop_relation(backup_relation) %}
+	{% endif %}
         {% do adapter.rename_relation(target_relation, backup_relation) %}
 	{% do relations_to_drop.append(backup_relation) %}
        

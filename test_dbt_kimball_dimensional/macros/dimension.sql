@@ -21,9 +21,6 @@
         {% endif %}
     {% endfor  %}
 
-
-	
-
     {% set config_args= {
               "sql" : sql,
               "dim_key" : this.table ~ '_key',
@@ -44,6 +41,8 @@
     -- BEGIN 
     {{ run_hooks(pre_hooks, inside_transaction=True) }}
 
+    {% set relations_to_drop = [] %}
+
     {% if existing_relation is none %}
         {% call statement('main') %}
             {{ create_table_as(False,
@@ -59,6 +58,7 @@
         {% do drop_relation_if_exists(backup_relation) %}
 
         {% do adapter.rename_relation(target_relation, backup_relation) %}
+	{% do relations_to_drop.append(backup_relation) %}
        
         {% call statement('main') %}
             {{ create_table_as(False,
@@ -83,6 +83,10 @@
 
   {% do adapter.commit() %}
   {{ run_hooks(post_hooks) }}
+  
+  {% for relation in relations_to_drop %}
+     {% do drop_relation_if_exists(relation) %}
+  {% endfor %}
   
   {{ return({'relations': [target_relation]}) }}
 

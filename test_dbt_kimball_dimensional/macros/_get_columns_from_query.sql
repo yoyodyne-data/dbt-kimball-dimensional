@@ -11,5 +11,5 @@
 	SELECT * FROM __dbt_kimball_dimensional_stub LIMIT 0
     {% endset %}
     {% set structure = run_query(stub_sql) %}
-    {{ return(structure.column_names) }}
+    {{ return((structure.column_names,structure.column_types,)) }}
 {%- endmacro -%}

@@ -13,36 +13,35 @@
     {%- set existing_relation = load_relation(this) -%}
     {%- set target_exists = existing_relation is not none -%}
 
-    {%- set dim_key = this.table ~ '_key' -%}
-    {%- set dim_id =  this.table ~ '_id' -%}
-
-    {%- set DNI = config.require('durable_natural_id') -%}
     {%- set CDC = config.require('change_data_capture') -%}
-    {% set full_refresh = flags.FULL_REFRESH %}
-    {%- set type_0_columns = config.get('type_0',default=[]) -%}
-    {%- set type_1_columns = config.get('type_1',default=[]) -%}
-    {%- set type_4_columns = config.get('type_4',default=[]) -%}
-    {%- set type_10_columns = config.get('type_10',default=[]) -%}
-    {%- set CDC_data_type = config.get('change_data_capture_column_type',default='timestamp') -%}
-    {%- set indexes = config.get('indexes',default=[dim_key,dim_id]) -%}
-    {%- set beginning_of_time = config.get('beginning_of_time',default='1970-01-01') -%}
-    {%- set lookback_window = config.get('lookback_window',default=none) -%}
 
-    {% set model_query_columns = _get_columns_from_query(sql)  %}
+    {% set model_query_columns, model_query_data_types = _get_columns_from_query(sql)  %}
+    {%- for col in model_query_columns -%}
+        {%- if col == CDC -%}
+            {%- set cdc_data_type = model_query_data_types[loop.index0] -%}
+        {%- endif -%}
+    {%- endfor  -%}
+
     -- TODO: rename target_columns key to model_query_columns
-    {%- set config_args= {"sql":sql,
-              "DNI":DNI,
-              "CDC":CDC,
-              "full_refresh":full_refresh,
-              "type_0_columns":type_0_columns,
-              "type_1_columns":type_1_columns,
-              "type_4_columns":type_4_columns,
-              "type_10_columns":type_10_columns,
-              "beginning_of_time":beginning_of_time,
-              "lookback_window":lookback_window,
-              "target_columns":model_query_columns, 
-              "backup_relation":backup_relation,
-              "target_exists": target_exists} -%}
+
+    {%- set config_args= {
+              "sql" : sql,
+              "dim_key" : this.table ~ '_key',
+              "dim_id" : this.table ~ '_id',
+              "DNI" : config.require('durable_natural_id'),
+              "CDC" : CDC,
+              "cdc_data_type" : cdc_data_type,
+              "full_refresh" : flags.FULL_REFRESH,
+              "type_0_columns" : config.get('type_0',default=[]),
+              "type_1_columns" : config.get('type_1',default=[]),
+              "type_4_columns" : config.get('type_4',default=[]),
+              "type_10_columns" : config.get('type_10',default=[]),
+              "indexes" : config.get('indexes',default=[dim_key,dim_id]), 
+              "beginning_of_time" : config.get('beginning_of_time',default='1970-01-01'),
+              "lookback_window" : config.get('lookback_window',default=0),
+              "target_columns" : model_query_columns, 
+              "backup_relation" : backup_relation,
+              "target_exists" : target_exists} -%}
 
 
     -- BEGIN 

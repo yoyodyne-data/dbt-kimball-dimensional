@@ -6,16 +6,15 @@
        RETURNS: the combined SQL cte stack to generate the executable sql.
     #}*/
     {%- set has_aggregates = config_args['type_4_columns'] + config_args['type_10_columns'] -%}
-    {%- set dim_id = this.table ~ '_id' -%}
-    {%- set dim_key = this.table ~ '_key' -%}
+
  	WITH
 	__dbt_kimball_dimensional_source AS (
 	   {{ source_cte }}
         )	
 	,__dbt_kimball_dimensional_slowly_changing_dimensions_with_duplicates AS (
    	SELECT 
-	   {{ dim_key }}
-	   ,{{ dim_id }}
+	   {{ config_args["dim_key"] }}
+	   ,{{ config_args["dim_id"] }}
 	-- type 0 
         {% for col in config_args["type_0_columns"] %}
 	   ,LAST_VALUE( {{col}} ) OVER natural_key_window AS {{col}}
@@ -72,7 +71,7 @@
        max_existing_id AS (
        {%- if config_args["target_exists"] and not config_args["full_refresh"] -%}
 	  SELECT
-	    MAX( {{ dim_id }} ) FROM {{ config_args["backup_relation"] }}
+	    MAX( {{ config_args["dim_id"] }} ) FROM {{ config_args["backup_relation"] }}
        {%- else -%}
           SELECT
 	      0 
@@ -88,7 +87,7 @@
        )
        SELECT
           row_numbers.{{ config_args["DNI"] }}
-	  ,COALESCE( duplicates.{{ dim_id }}, max_existing_id + id_increment) AS {{ dim_id }}
+	  ,COALESCE( duplicates.{{ config_args["dim_id"] }}, max_existing_id + id_increment) AS {{ config_args["dim_id"] }}
        FROM 
          row_numbers 
        LEFT JOIN
@@ -100,8 +99,8 @@
     )
     ,__dbt_kimball_dimensional_slowly_changing_dimensions AS (
     SELECT 
-       COALESCE( {{ dim_key }}, ROW_NUMBER() OVER() ) AS {{ dim_key }}
-       ,durable_ids.{{ dim_id }}
+       COALESCE( {{ config_args["dim_key"] }}, ROW_NUMBER() OVER() ) AS {{ config_args["dim_key"] }}
+       ,durable_ids.{{ config_args["dim_id"] }}
        {% for col in config_args["type_4_columns"] + config_args["type_10_columns"] %}
 	, deduped.all_{{ col }}_values AS all_{{ col }}_values
        {% endfor %}

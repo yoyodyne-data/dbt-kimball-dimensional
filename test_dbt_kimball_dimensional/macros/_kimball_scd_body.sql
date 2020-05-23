@@ -105,7 +105,7 @@
        {% for col in config_args["type_4_columns"] + config_args["type_10_columns"] %}
 	, deduped.all_{{ col }}_values AS all_{{ col }}_values
        {% endfor %}
-       {% for col in target_columns %}
+       {% for col in config_args["target_columns"] %}
 	  {% if col not in config_args["type_4_columns"] %}
 	    ,scd.{{ col }} AS {{ col }}
 	  {% endif %} 

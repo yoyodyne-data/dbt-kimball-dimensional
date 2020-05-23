@@ -22,7 +22,7 @@
 	   SELECT
 	     NULL::numeric AS {{ dim_key }}
 	     ,NULL::numeric AS {{ dim_id }}
-	      *
+	     ,*
 	   FROM 
 	     _base_source
 	   WHERE
@@ -30,7 +30,7 @@
         
 	
 	{%- if lookback_window -%}
-	   {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM target_max)') }}
+	   {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM target_max) ') }}
      	   AND 
 	   {{ xdb.hash([ '_base_source.' ~ CDC, '_base_source.' ~ DNI ]) }} 
 	   NOT IN
@@ -41,9 +41,9 @@
 	   WHERE 
 	     {{ config_args["CDC"] }} > 
 	     {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM target_max)') }}
-            )
+            ) 
 	{%- else -%}
-           (SELECT max_cdc FROM target_max)
+           (SELECT max_cdc FROM target_max) 
 	{%- endif -%}
 	)
 	,_from_target AS (
@@ -61,7 +61,7 @@
 	    UNION ALL
 	    SELECT
 		*
-	    FROM _from_target)
+	    FROM _from_target) unioned
 	)
       {%- else -%}
         ,_final_source AS (

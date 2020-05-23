@@ -4,21 +4,21 @@
         {{ config_args["dim_key"] }}
         ,{{ config_args["dim_id"] }}
     -- type 0 
-    {%- for col in config_args["type_0_columns"] -%}
+    {% for col in config_args["type_0_columns"] -%}
         ,LAST_VALUE( {{col}} ) OVER natural_key_window AS {{col}}
     {%- endfor -%}
 
     -- type 1
-    {%- for col in config_args["type_1_columns"] -%}
+    {% for col in config_args["type_1_columns"] -%}
         ,FIRST_VALUE( {{col}} ) OVER natural_key_window AS {{col}}
     {%- endfor -%}
 
     -- type 4 + 10
-    {%- for col in config_args["type_4_columns"] + config_args["type_10_columns"] -%}
+    {% for col in config_args["type_4_columns"] + config_args["type_10_columns"] -%}
         ,array_agg( {{col}} ) OVER (PARTITION BY {{ config_args["DNI"] }}) AS all_{{col}}_values
     {%- endfor -%}
     
-    {%- for col in config_args["target_columns"] -%}
+    {% for col in config_args["model_query_columns"] -%}
         {%- if col not in config_args["type_0_columns"] + config_args["type_1_columns"] + config_args["type_4_columns"] -%}
         ,{{ col }} 
         {%- endif -%}

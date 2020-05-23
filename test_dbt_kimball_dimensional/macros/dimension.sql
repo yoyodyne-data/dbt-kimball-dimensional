@@ -11,7 +11,6 @@
  
     {%- set target_relation = this -%}
     {%- set existing_relation = load_relation(this) -%}
-    {%- set target_exists = existing_relation is not none -%}
 
     {%- set CDC = config.require('change_data_capture') -%}
 
@@ -39,23 +38,19 @@
               "indexes" : config.get('indexes',default=[dim_key,dim_id]), 
               "beginning_of_time" : config.get('beginning_of_time',default='1970-01-01'),
               "lookback_window" : config.get('lookback_window',default=0),
-              "target_columns" : model_query_columns, 
-              "backup_relation" : backup_relation,
-              "target_exists" : target_exists} -%}
+              "model_query_columns" : model_query_columns, 
+              "existing_relation" : existing_relation} -%}
 
 
     -- BEGIN 
     {{ run_hooks(pre_hooks, inside_transaction=True) }}
 
-    {% set slowly_changing_dimension_body = _kimball_scd_body(config_args, 
-                                                              _kimball_source_query(config_args) )  %}
-    
     {%- if not config_args["target_exists"] -%}
 
         {% call statement('main') %}
             {{ create_table_as(False,
                                target_relation,
-                               slowly_changing_dimension_body) }}
+                               _build_kimball_dimension(config_args)) }}
         {% endcall %}
 
     {%- elif config_args["full_refresh"] -%}

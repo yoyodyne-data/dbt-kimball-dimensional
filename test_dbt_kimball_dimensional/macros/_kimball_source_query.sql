@@ -1,8 +1,8 @@
-{%- macro _kimball_cdc_predicate_lookback_type_partial(config_args) -%}
-    {%- if config_args['cdc_data_type'] in ('Date','DateTime',) -%}
-    {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM target_max) ') }}
+{%- macro _kimball_cdc_predicate_lookback_type_partial(config_args) -%} 
+    {%- if config_args['cdc_data_type'] == 'timestamp' -%}
+    {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM _target_max) ') }}
     {%- else -%}
-    ( {{ config_args["lookback_window"] }} * -1) + (SELECT max_cdc FROM target_max)
+    ( {{ config_args["lookback_window"] }} * -1) + (SELECT max_cdc FROM _target_max)
     {%- endif -%}
 {%- endmacro -%}
 

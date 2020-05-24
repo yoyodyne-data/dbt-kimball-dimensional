@@ -1,7 +1,7 @@
 {{ config(materialized='dimension',
 	  durable_natural_id="event_id",
 	  beginning_of_time="2007-01-01",
-	  lookback_window='all',
+	  lookback_window=3,
 	  change_data_capture="collector_date") }}
 
 SELECT

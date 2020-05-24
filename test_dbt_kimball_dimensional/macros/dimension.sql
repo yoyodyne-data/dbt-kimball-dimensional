@@ -14,12 +14,7 @@
 
     {% set CDC = config.require('change_data_capture') %}
 
-    {% set model_query_columns, model_query_data_types = _get_columns_from_query(sql)  %}
-    {% for col in model_query_columns %}
-        {% if col == CDC %}
-            {% set cdc_data_type = model_query_data_types[loop.index0] %}
-        {% endif %}
-    {% endfor  %}
+    {% set model_query_columns  = _get_columns_from_query(sql)[0]  %}
 
     {% set config_args= {
               "sql" : sql,
@@ -27,7 +22,7 @@
               "dim_id" : this.table ~ '_id',
               "DNI" : config.require('durable_natural_id'),
               "CDC" : CDC,
-              "cdc_data_type" : cdc_data_type,
+              "cdc_data_type" : config.get('cdc_data_type',default='timestamp'),
               "full_refresh" : flags.FULL_REFRESH,
               "type_0_columns" : config.get('type_0',default=[]),
               "type_1_columns" : config.get('type_1',default=[]),

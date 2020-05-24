@@ -1,0 +1,12 @@
+dim_user_key,dim_user_id,row_effective_at,row_expired_at,row_is_current,natural_key,first_name,last_name,email_address,all_email_addresses,phone_number,all_phone_numbers,is_preferred_user,age_bracket,birthday,account_created_at,all_web_event_visitor_ids
+-1,-1,1970-01-01,9999-12-31 23:59:59,TRUE,-1,First Name Unknown,Last Name Unknown,Email Address Unknown,[],Current Phone Number Unknown,[],FALSE,0,1970-01-01,1970-01-01,[]
+1000,1,1970-01-01,9999-12-31 23:59:59,TRUE,12348,Newton,Nethercott,nnethercott0@fc2.com,[nnethercott0@fc2.com],308-261-7168,[308-261-7168],TRUE,28,5/31/1991,2018-03-19 17:55:00,[788d3a7d064b41a389c125c76ea3d63b]
+1001,2,1970-01-01,9999-12-31 23:59:59,TRUE,19999,Gwendolen,Dobbson,gdobbson1@51.la,[gdobbson1@51.la],485-927-7015,[485-927-7015],TRUE,100,2/22/1920,2019-07-17 19:10:12,[]
+1002,3,1970-01-01,9999-12-31 23:59:59,TRUE,12560,Melissa,Bonnavant,mbonnavant2@newyorker.com,[mbonnavant2@newyorker.com],602-838-9990,[602-838-9990],FALSE,36,2/4/1984,2019-12-30 23:39:38,[64572210ee0945869a23f10bfcc7d61c]
+1003,4,1970-01-01,9999-12-31 23:59:59,TRUE,12121,Chadd,Bettenay,cbettenay3@unicef.org,[cbettenay3@unicef.org],248-195-7305,[248-195-7305],TRUE,51,5/3/1969,2019-09-25 0:41:35,[]
+1004,5,1970-01-01,9999-12-31 23:59:59,TRUE,11111,Josephina,Twist,jtwist4@cbsnews.com,[jtwist4@cbsnews.com],113-169-0115,[113-169-0115],FALSE,28,4/14/1992,2019-07-05 2:56:55,[]
+1005,6,1970-01-01,9999-12-31 23:59:59,TRUE,12569,Tabbatha,Kurt,tkurt5@deviantart.com,[tkurt5@deviantart.com],121-529-5100,[121-529-5100],TRUE,43,5/28/1976,2019-09-15 18:16:49,[]
+1006,7,1970-01-01,9999-12-31 23:59:59,TRUE,19821,Reggie,Caunt,rcaunt6@tiny.cc,[rcaunt6@tiny.cc],459-139-1439,[459-139-1439],TRUE,Unknown,No Birthday Provided,2019-11-03 15:44:22,[]
+1007,8,1970-01-01,9999-12-31 23:59:59,TRUE,19811,Ertha,Badwick,ebadwick7@ning.com,[ebadwick7@ning.com],290-215-5216,[290-215-5216],TRUE,179,8/12/1840,2020-05-12 11:35:01,[]
+1008,9,1970-01-01,9999-12-31 23:59:59,TRUE,19801,Lorelei,Michelet,lmichelet8@who.int,[lmichelet8@who.int],456-139-8458,[456-139-8458],FALSE,0,11/21/2019,2019-06-24 13:20:59,[]
+1009,10,1970-01-01,9999-12-31 23:59:59,TRUE,19342,Violette,Lane,vlane9@phpbb.com,[vlane9@phpbb.com],443-374-5739,[443-374-5739],TRUE,39,1/14/1981,2019-05-18 17:21:55,[]

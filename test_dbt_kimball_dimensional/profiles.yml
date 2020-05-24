@@ -1,0 +1,46 @@
+### only uncomment the profiles you are able to support :) 
+default:
+  outputs:
+          
+    bigquery:    
+      type: bigquery
+      method: service-account
+      project: "{{ env_var('BIGQUERY_PROJECT') }}"
+      dataset: testxdb
+      threads: 12
+      keyfile: /app/keyfile.json
+      timeout_seconds: 300
+      priority: interactive
+      retries: 1
+
+    postgres:
+      type: postgres
+      threads: 12
+      host: test_dbt_kimball_dimensional_postgres
+      port: 5432
+      user: testkimball
+      pass: testkimball
+      dbname: testkimball
+      schema: prod
+
+#    redshift:
+#      type: redshift
+#      threads: 1
+#      host: 127.0.0.1
+#      port: 5439
+#      user: alice
+#      pass: pa55word
+#      dbname: warehouse
+#      schema: dbt_alice
+
+    snowflake:
+      type: snowflake
+      threads: 12
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USERNAME') }}"
+      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+      schema: test_xdb
+      warehouse: xsmall
+
+  target: postgres

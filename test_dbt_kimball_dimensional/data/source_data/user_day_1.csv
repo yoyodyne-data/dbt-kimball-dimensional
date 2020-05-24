@@ -1,0 +1,11 @@
+batched_at,user_id,first_name,last_name,email,phone_number,preferred_status,account_created_at,birthdate
+2020-01-01 1:35:10,12348,Newton,Nethercott,nnethercott0@fc2.com,308-261-7168,TRUE,2018-03-19 17:55:00,5/31/1991
+2020-01-01 1:35:10,19999,Gwendolen,Dobbson,gdobbson1@51.la,485-927-7015,TRUE,2019-07-17 19:10:12,2/22/1920
+2020-01-01 1:35:10,12560,Melissa,Bonnavant,mbonnavant2@newyorker.com,602-838-9990,FALSE,2019-12-30 23:39:38,2/4/1984
+2020-01-01 1:35:10,12121,Chadd,Bettenay,cbettenay3@unicef.org,248-195-7305,TRUE,2019-09-25 0:41:35,5/3/1969
+2020-01-01 1:35:10,11111,Josephina,Twist,jtwist4@cbsnews.com,113-169-0115,FALSE,2019-07-05 2:56:55,4/14/1992
+2020-01-01 1:35:10,12569,Tabbatha,Kurt,tkurt5@deviantart.com,121-529-5100,TRUE,2019-09-15 18:16:49,5/28/1976
+2020-01-01 1:35:10,19821,Reggie,Caunt,rcaunt6@tiny.cc,459-139-1439,TRUE,2019-11-03 15:44:22,NULL
+2020-01-01 1:35:10,19811,Ertha,Badwick,ebadwick7@ning.com,290-215-5216,TRUE,2020-05-12 11:35:01,8/12/1840
+2020-01-01 1:35:10,19801,Lorelei,Michelet,lmichelet8@who.int,456-139-8458,FALSE,2019-06-24 13:20:59,11/21/2019
+2020-01-01 1:35:10,19342,Violette,Lane,vlane9@phpbb.com,443-374-5739,TRUE,2019-05-18 17:21:55,1/14/1981

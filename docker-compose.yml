@@ -1,0 +1,31 @@
+version: "3.5"
+
+services:
+  test_dbt_kimball_dimensional_postgres:
+    image: postgres:12
+    hostname: test_dbt_kimball_dimensional_postgres
+    ports:
+        - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: testkimball
+      POSTGRES_USER: testkimball
+      POSTGRES_DB: testkimball
+
+  test_kimball:
+    image: test_kimball
+    container_name: test_kimball
+    working_dir: /app
+    environment:
+      PATH: "/app:${PATH}"
+      SNOWFLAKE_USERNAME: "${SNOWFLAKE_USERNAME}"
+      SNOWFLAKE_PASSWORD: "${SNOWFLAKE_PASSWORD}"
+      SNOWFLAKE_ACCOUNT: "${SNOWFLAKE_ACCOUNT}"
+      SNOWFLAKE_DATABASE: "${SNOWFLAKE_DATABASE}"
+      BIGQUERY_PROJECT: "${BIGQUERY_PROJECT}"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./test_dbt_kimball_dimensional/:/app
+      - ./:/dbt_kimball_dimensional
+    command: tail -f /dev/null  

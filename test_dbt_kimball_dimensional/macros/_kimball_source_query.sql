@@ -1,3 +1,44 @@
+{%- macro _kimball_cdc_predicate_lookback_type_partial(config_args) -%}
+    {%- if config_args['cdc_data_type'] in ('Date','DateTime',) -%}
+    {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM target_max) ') }}
+    {%- else -%}
+    ( {{ config_args["lookback_window"] }} * -1) + (SELECT max_cdc FROM target_max)
+    {%- endif -%}
+{%- endmacro -%}
+
+
+{%- macro _kimball_cdc_predicate_calculation(config_args) -%}
+
+    {%- if config_args["lookback_window"] | lower == "all" -%}
+         {{ xdb.hash([ config_args["CDC"],config_args["DNI"] ]) }} 
+        NOT IN
+        (SELECT     
+            {{ xdb.hash([ config_args["CDC"],config_args["DNI"] ]) }} 
+        FROM 
+            {{ config_args["existing_relation"] }})
+    {%- elif config_args["lookback_window"] > 0 -%}
+        {{ config_args["CDC"] }} > 
+        {{ _kimball_cdc_predicate_lookback_type_partial(config_args) }}
+    AND 
+     {{ xdb.hash([ config_args["CDC"],config_args["DNI"] ]) }} 
+    NOT IN
+    (SELECT     
+        {{ xdb.hash([ config_args["CDC"],config_args["DNI"] ]) }} 
+    FROM 
+        {{ config_args["existing_relation"] }}
+    WHERE 
+        {{ config_args["CDC"] }} > 
+        {{ _kimball_cdc_predicate_lookback_type_partial(config_args) }}
+    ) 
+    {%- else -%}
+        {{ config_args["CDC"] }} > 
+        (SELECT max_cdc FROM _target_max) 
+    {%- endif -%}
+{%- endmacro -%}
+
+
+
+
 {%- macro _kimball_source_query(config_args) -%}
    /*{# The query partial that defines our "source", ie records to be operated on.
         ARGS:
@@ -7,13 +48,13 @@
    
     {%- set incremental = ( not config_args['full_refresh'] and config_args['existing_relation'] is not none ) -%}
     WITH 
-        _base_source AS (	
+        _base_source AS (   
             {{ config_args["sql"] }}
-        )	
+        )   
     {%- if incremental -%}
         ,_target_max AS (
             SELECT 
-                MAX( {{ config_args['CDC'] }} ) as max_cdc	
+                MAX( {{ config_args['CDC'] }} ) as max_cdc  
             FROM
                 {{ config_args["existing_relation"] }}
         )
@@ -25,23 +66,7 @@
             FROM 
                 _base_source
             WHERE
-                {{ config_args["CDC"] }} > 
-            {%- if lookback_window -%}
-                {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM target_max) ') }}
-            AND 
-                 {{ xdb.hash([ '_base_source.' ~ CDC, '_base_source.' ~ DNI ]) }} 
-            NOT IN
-                (SELECT 	
-                    {{ xdb.hash([ CDC,DNI ]) }} 
-                FROM 
-                    {{ config_args["backup_relation"] }}
-                WHERE 
-                    {{ config_args["CDC"] }} > 
-                    {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM target_max)') }}
-                ) 
-            {%- else -%}
-                (SELECT max_cdc FROM _target_max) 
-            {%- endif -%}
+            {{ _kimball_cdc_predicate_calculation(config_args) }}
         )
         ,_from_target AS (
             SELECT
@@ -58,23 +83,23 @@
             SELECT 
                 *
             FROM 
-		(SELECT 
-		    {{ config_args["dim_key"] }}
-		    ,{{ config_args["dim_id"] }}
-		{% for col in config_args['model_query_columns'] %}
-		    ,{{ col }}
-		{% endfor %}
-		FROM
-		   _from_source
+        (SELECT 
+            {{ config_args["dim_key"] }}
+            ,{{ config_args["dim_id"] }}
+        {% for col in config_args['model_query_columns'] %}
+            ,{{ col }}
+        {% endfor %}
+        FROM
+           _from_source
                     UNION
-	        SELECT 
-		    {{ config_args["dim_key"] }}
-		    ,{{ config_args["dim_id"] }}
-		{% for col in config_args['model_query_columns'] -%}
-		    ,{{ col }}
-		{% endfor %}
-		FROM
-		   _from_target) unioned
+            SELECT 
+            {{ config_args["dim_key"] }}
+            ,{{ config_args["dim_id"] }}
+        {% for col in config_args['model_query_columns'] -%}
+            ,{{ col }}
+        {% endfor %}
+        FROM
+           _from_target) unioned
         )
     {%- else -%}
         ,_final_source AS (

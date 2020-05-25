@@ -51,10 +51,6 @@
 {%- endmacro -%}
 
 
-
-
-
-
 {%- macro _kimball_max_key(config_args) -%}
 
     {%- set incremental = ( not config_args['full_refresh'] and config_args['existing_relation'] is not none ) -%}
@@ -95,8 +91,8 @@
     {% for col in config_args["type_10_columns"] -%}
         ,deduped.all_{{ col }}_values AS all_{{ col }}_values
     {% endfor %}
-    {% for col in config_args["model_query_columns"] -%}
-        ,scd.{{ col }} AS {{ col }}
+    {% for col in config_args["target_columns"] -%}
+        ,scd.{{ col["name"] }} AS {{ col["name"] }}
     {%- endfor %}
         ,scd.row_effective_at
         ,scd.row_expired_at
@@ -200,12 +196,12 @@
 
     -- type 10
     {% for col in config_args["type_10_columns"] -%}
-        ,array_agg( {{col}} ) OVER (PARTITION BY {{ config_args["DNI"] }}) AS all_{{col}}_values
+        ,array_agg( {{ col["name"] }} ) OVER (PARTITION BY {{ config_args["DNI"] }}) AS all_{{ col["name"] }}_values
     {%- endfor -%}
     
-    {% for col in config_args["model_query_columns"] -%}
-        {%- if col not in config_args["type_0_columns"] + config_args["type_1_columns"] -%}
-        ,{{ col }} 
+    {% for col in config_args["target_columns"] -%}
+        {%- if col["name"] not in config_args["type_0_columns"] + config_args["type_1_columns"] -%}
+        ,{{ col["name"] }} 
         {%- endif -%}
     {%- endfor -%}
 
@@ -231,7 +227,7 @@
 
 
 {%- macro _kimball_cdc_predicate_lookback_type_partial(config_args) -%} 
-    {%- if config_args['cdc_data_type'] == 'timestamp' -%}
+    {%- if config_args['cdc_data_type'] in ('time','date',) -%}
     {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM _target_max) ') }}
     {%- else -%}
     ( {{ config_args["lookback_window"] }} * -1) + (SELECT max_cdc FROM _target_max)
@@ -318,8 +314,8 @@
         (SELECT 
             {{ config_args["dim_key"] }}
             ,{{ config_args["dim_id"] }}
-        {% for col in config_args['model_query_columns'] %}
-            ,{{ col }}
+        {% for col in config_args["target_columns"] %}
+            ,{{ col["name"] }}
         {% endfor %}
         FROM
            _from_source
@@ -327,8 +323,8 @@
             SELECT 
             {{ config_args["dim_key"] }}
             ,{{ config_args["dim_id"] }}
-        {% for col in config_args['model_query_columns'] -%}
-            ,{{ col }}
+        {% for col in config_args["target_columns"] -%}
+            ,{{ col["name"] }}
         {% endfor %}
         FROM
            _from_target) unioned

@@ -1,3 +1,56 @@
+{%- macro _kimball_get_columns(existing_relation,sql,type_10_columns) -%}
+    /*{# gets the column names and datatypes for the target table.
+        ARGS:
+            - existing_relation (Relation, None) the DBT relation object if the relation already exists or none if it does not.
+            - sql (string) the base sql statement from the model.
+            - type_10_columns (list) the columns that will have type 10 materializations.
+        RETURNS: a list of dicts with column name and data type.
+    #}*/
+        {% set columns = [] %}
+        {% if existing_realtion is none %}
+            {% set stub_sql %}
+            WITH __dbt_kimball_dimensional_stub AS (
+             {{ sql }} 
+            )
+            SELECT * FROM __dbt_kimball_dimensional_stub LIMIT 1
+            {% endset %}
+            {% set structure = run_query(stub_sql) %}
+            {% for col in structure.columns %}
+                {% set dtype = 'time' if 'DateTime' in col.data_type | string 
+                               else 'date' if 'Date' in col.data_type | string 
+                               else 'number' if 'Number' in col.data_type | string 
+                               else 'text' %}
+                {% do columns.append({"name":col.name,
+                                       "data_type": dtype}) %} 
+            {% endfor %}
+        {% else %}
+            {% set type_10_column_exclusions = [] %}
+            {% for col in type_10_columns %}
+                {% do type_10_column_exclusions.append('all_' ~ col ~'_values') %}
+            {% endfor %}
+            {% set existing_columns = adapter.get_columns_in_relation(existing_relation) %}
+            {% for col in existing_columns %}
+                {% if col.name not in ['row_effective_at',
+                                     'row_expired_at',
+                                     'row_is_current',
+                                      this.table ~ '_key',
+                                      this.table  ~ '_id',] + type_10_column_exclusions %}
+                {% set dtype = 'time' if 'timestamp' in col.dtype | string  
+                               else 'date' if 'date' in col.dtype | string 
+                               else 'number' if 'integer' in col.dtype | string 
+                               else 'number' if 'float' in col.dtype | string 
+                               else 'number' if 'numeric' in col.dtype | string 
+                               else 'text' %}
+                    {% do columns.append({"name":col.name,
+                                          "data_type":dtype}) %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {{ return(columns) }}
+
+{%- endmacro -%}
+
+
 {%- macro _kimball_max_key(config_args) -%}
 
     {%- set incremental = ( not config_args['full_refresh'] and config_args['existing_relation'] is not none ) -%}
@@ -38,8 +91,8 @@
     {% for col in config_args["type_10_columns"] -%}
         ,deduped.all_{{ col }}_values AS all_{{ col }}_values
     {% endfor %}
-    {% for col in config_args["model_query_columns"] -%}
-        ,scd.{{ col }} AS {{ col }}
+    {% for col in config_args["target_columns"] -%}
+        ,scd.{{ col["name"] }} AS {{ col["name"] }}
     {%- endfor %}
         ,scd.row_effective_at
         ,scd.row_expired_at
@@ -143,12 +196,12 @@
 
     -- type 10
     {% for col in config_args["type_10_columns"] -%}
-        ,array_agg( {{col}} ) OVER (PARTITION BY {{ config_args["DNI"] }}) AS all_{{col}}_values
+        ,array_agg( {{ col["name"] }} ) OVER (PARTITION BY {{ config_args["DNI"] }}) AS all_{{ col["name"] }}_values
     {%- endfor -%}
     
-    {% for col in config_args["model_query_columns"] -%}
-        {%- if col not in config_args["type_0_columns"] + config_args["type_1_columns"] -%}
-        ,{{ col }} 
+    {% for col in config_args["target_columns"] -%}
+        {%- if col["name"] not in config_args["type_0_columns"] + config_args["type_1_columns"] -%}
+        ,{{ col["name"] }} 
         {%- endif -%}
     {%- endfor -%}
 
@@ -174,7 +227,7 @@
 
 
 {%- macro _kimball_cdc_predicate_lookback_type_partial(config_args) -%} 
-    {%- if config_args['cdc_data_type'] == 'timestamp' -%}
+    {%- if config_args['cdc_data_type'] in ('time','date',) -%}
     {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM _target_max) ') }}
     {%- else -%}
     ( {{ config_args["lookback_window"] }} * -1) + (SELECT max_cdc FROM _target_max)
@@ -261,8 +314,8 @@
         (SELECT 
             {{ config_args["dim_key"] }}
             ,{{ config_args["dim_id"] }}
-        {% for col in config_args['model_query_columns'] %}
-            ,{{ col }}
+        {% for col in config_args["target_columns"] %}
+            ,{{ col["name"] }}
         {% endfor %}
         FROM
            _from_source
@@ -270,8 +323,8 @@
             SELECT 
             {{ config_args["dim_key"] }}
             ,{{ config_args["dim_id"] }}
-        {% for col in config_args['model_query_columns'] -%}
-            ,{{ col }}
+        {% for col in config_args["target_columns"] -%}
+            ,{{ col["name"] }}
         {% endfor %}
         FROM
            _from_target) unioned
@@ -304,7 +357,7 @@
 	WITH __dbt_kimball_dimensional_stub AS (
 	 {{ sql }} 
 	)
-	SELECT * FROM __dbt_kimball_dimensional_stub LIMIT 0
+	SELECT * FROM __dbt_kimball_dimensional_stub LIMIT 1
     {% endset %}
     {% set structure = run_query(stub_sql) %}
     {{ return((structure.column_names,structure.column_types,)) }}

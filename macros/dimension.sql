@@ -14,15 +14,21 @@
 
     {% set CDC = config.require('change_data_capture') %}
 
-    {% set model_query_columns  = kimball._get_columns_from_query(sql)[0]  %}
-
+    {%- set target_columns = kimball._kimball_get_columns(existing_relation,sql,config.get('type_10',default=[])) -%}
+    {% for col in target_columns %}
+        {% if col['name'] == CDC %}
+            {% set cdc_data_type = col['data_type'] %}
+        {% endif %}
+    {% endfor %}
+    
+    
     {% set config_args= {
               "sql" : sql,
               "dim_key" : this.table ~ '_key',
               "dim_id" : this.table ~ '_id',
               "DNI" : config.require('durable_natural_id'),
               "CDC" : CDC,
-              "cdc_data_type" : config.get('cdc_data_type',default='timestamp'),
+              "cdc_data_type" : cdc_data_type,
               "full_refresh" : flags.FULL_REFRESH,
               "type_0_columns" : config.get('type_0',default=[]),
               "type_1_columns" : config.get('type_1',default=[]),
@@ -30,7 +36,7 @@
               "indexes" : config.get('indexes',default=[dim_key,dim_id]), 
               "beginning_of_time" : config.get('beginning_of_time',default='1970-01-01'),
               "lookback_window" : config.get('lookback_window',default=0),
-              "model_query_columns" : model_query_columns, 
+              "target_columns" : target_columns,
               "existing_relation" : existing_relation} %}
 
     -- BEGIN 
@@ -49,11 +55,11 @@
 
         {% set backup_relation = existing_relation.incorporate(
                 path={"identifier": target_relation.identifier ~ "__dbt_kimball_backup"} ) %}
-	{% if load_relation(backup_relation) is not none %}
-	    {% do adapter.drop_relation(backup_relation) %}
-	{% endif %}
+    {% if load_relation(backup_relation) is not none %}
+        {% do adapter.drop_relation(backup_relation) %}
+    {% endif %}
         {% do adapter.rename_relation(target_relation, backup_relation) %}
-	{% do relations_to_drop.append(backup_relation) %}
+    {% do relations_to_drop.append(backup_relation) %}
        
         {% call statement('main') %}
             {{ create_table_as(False,
@@ -82,10 +88,6 @@
   {% for relation in relations_to_drop %}
      {% do drop_relation_if_exists(relation) %}
   {% endfor %}
-  
-  {{ log(target_relation.metadata, info=True) }}
-
-  {% do target_relation.sock = "shoes" %} 
 
   {{ return({'relations': [target_relation]}) }}
 

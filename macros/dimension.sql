@@ -14,15 +14,19 @@
 
     {% set CDC = config.require('change_data_capture') %}
 
-    {% set model_query_columns  = kimball._get_columns_from_query(sql)[0]  %}
-
+    {% set model_query_columns, model_query_column_types  = kimball._get_columns_from_query(sql)  %}
+    
+    {%- set target_columns = kimball._kimball_get_columns(existing_relation,sql,config.get('type_10',default=[])) -%}
+    
+    
+    
     {% set config_args= {
               "sql" : sql,
               "dim_key" : this.table ~ '_key',
               "dim_id" : this.table ~ '_id',
               "DNI" : config.require('durable_natural_id'),
               "CDC" : CDC,
-              "cdc_data_type" : config.get('cdc_data_type',default='timestamp'),
+              "cdc_data_type" : "date",
               "full_refresh" : flags.FULL_REFRESH,
               "type_0_columns" : config.get('type_0',default=[]),
               "type_1_columns" : config.get('type_1',default=[]),
@@ -82,10 +86,6 @@
   {% for relation in relations_to_drop %}
      {% do drop_relation_if_exists(relation) %}
   {% endfor %}
-  
-  {{ log(target_relation.metadata, info=True) }}
-
-  {% do target_relation.sock = "shoes" %} 
 
   {{ return({'relations': [target_relation]}) }}
 

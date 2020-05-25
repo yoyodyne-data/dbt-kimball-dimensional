@@ -14,8 +14,6 @@
 
     {% set CDC = config.require('change_data_capture') %}
 
-    {% set model_query_columns, model_query_column_types  = kimball._get_columns_from_query(sql)  %}
-    
     {%- set target_columns = kimball._kimball_get_columns(existing_relation,sql,config.get('type_10',default=[])) -%}
     {% for col in target_columns %}
         {% if col['name'] == CDC %}
@@ -39,7 +37,6 @@
               "beginning_of_time" : config.get('beginning_of_time',default='1970-01-01'),
               "lookback_window" : config.get('lookback_window',default=0),
               "target_columns" : target_columns,
-              "model_query_columns" : model_query_columns, 
               "existing_relation" : existing_relation} %}
 
     -- BEGIN 

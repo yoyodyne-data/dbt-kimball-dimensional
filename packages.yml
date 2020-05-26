@@ -1,3 +1,5 @@
 packages:
   - git: "https://github.com/Health-Union/dbt-xdb.git"
     revision: 0.1.2
+  - package: fishtown-analytics/dbt_utils
+    version: 0.3.0

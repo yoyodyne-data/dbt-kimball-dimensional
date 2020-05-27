@@ -1,3 +1,4 @@
+{{ config(materialized='table') }}
 WITH
     date_range AS (
         {{ dbt_utils.date_spine("day",
@@ -7,6 +8,6 @@ WITH
 SELECT 
     TO_CHAR(date_day, 'YYYYMMDD') AS dim_date_key
     ,date_day::DATE AS date
-    
+    -- TODO:: add the rest of the dim fields!
 FROM 
     date_range

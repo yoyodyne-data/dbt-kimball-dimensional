@@ -14,7 +14,8 @@
 
     {% set CDC = config.require('change_data_capture') %}
 
-    {%- set target_columns = kimball._kimball_get_columns(existing_relation,sql,config.get('type_10',default=[])) -%}
+    {% set target_columns = kimball._kimball_get_columns(existing_relation,sql,config.get('type_10',default=[])) %}
+    {% set date_columns %}
     {% for col in target_columns %}
         {% if col['name'] == CDC %}
             {% set cdc_data_type = col['data_type'] %}

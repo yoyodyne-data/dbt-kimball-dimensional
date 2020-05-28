@@ -19,6 +19,13 @@ data-paths: ["data"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
 
+on-run-start: 
+    - "{{ kimball._kimball_create_meta_schema() }}"
+    - "{{ kimball._kimball_create_meta_dimension_table() }}"
+    - "{{ kimball._kimball_create_meta_fact_table() }}"
+on-run-end: 
+    - "{{ kimball._kimball_drop_meta_schema() }}"
+
 target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
     - "target"

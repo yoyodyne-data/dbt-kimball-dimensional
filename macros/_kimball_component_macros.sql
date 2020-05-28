@@ -26,15 +26,15 @@
         {% else %}
             {% set type_10_column_exclusions = [] %}
             {% for col in type_10_columns %}
-                {% do type_10_column_exclusions.append('all_' ~ col ~'_values') %}
+                {% do type_10_column_exclusions.append('all_' ~ col | lower ~'_values') %}
             {% endfor %}
             {% set existing_columns = adapter.get_columns_in_relation(existing_relation) %}
             {% for col in existing_columns %}
-                {% if col.name not in ['row_effective_at',
+                {% if col.name |lower not in ['row_effective_at',
                                      'row_expired_at',
                                      'row_is_current',
-                                      this.table ~ '_key',
-                                      this.table  ~ '_id',] + type_10_column_exclusions %}
+                                      this.table | lower ~ '_key',
+                                      this.table | lower ~ '_id',] + type_10_column_exclusions %}
                 {% set dtype = 'time' if 'timestamp' in col.dtype | string  
                                else 'date' if 'date' in col.dtype | string 
                                else 'number' if 'integer' in col.dtype | string 
@@ -180,7 +180,13 @@
 
 
 {%- macro _kimball_scd_with_duplicates_query(config_args, source_cte) -%}
-
+    /*{# The "main" query within the dimensional CTE stack. 
+        Produces the shaped structure by scd type. Aggregates in this query are not distinct.
+        ARGS:
+            - config_args (dict) the configuration arguments created at materialization init.
+            - source_cte (string) the cte representing all source records for this increment. 
+        RETURNS: the cte of shaped records ready to be deduplicated.
+    #}*/
     SELECT 
         {{ config_args["dim_key"] }}
         ,{{ config_args["dim_id"] }}
@@ -196,7 +202,7 @@
 
     -- type 10
     {% for col in config_args["type_10_columns"] -%}
-        ,array_agg( {{ col["name"] }} ) OVER (PARTITION BY {{ config_args["DNI"] }}) AS all_{{ col["name"] }}_values
+        ,array_agg( {{ col }} ) OVER (PARTITION BY {{ config_args["DNI"] }}) AS all_{{ col }}_values
     {%- endfor -%}
     
     {% for col in config_args["target_columns"] -%}
@@ -227,6 +233,7 @@
 
 
 {%- macro _kimball_cdc_predicate_lookback_type_partial(config_args) -%} 
+    /*{# Enables the lookback window to adjust for data types #}*/
     {%- if config_args['cdc_data_type'] in ('time','date',) -%}
     {{ xdb.dateadd('day',(config_args["lookback_window"] * -1) ,'(SELECT max_cdc FROM _target_max) ') }}
     {%- else -%}
@@ -236,6 +243,7 @@
 
 
 {%- macro _kimball_cdc_predicate_calculation(config_args) -%}
+    /*{# Determines the correct predicate for the source query.#}*/
 
     {%- if config_args["lookback_window"] | lower == "all" -%}
          {{ xdb.hash([ config_args["CDC"],config_args["DNI"] ]) }} 
@@ -346,19 +354,3 @@
             _final_source
 {%- endmacro -%}
 
-
-{%- macro _get_columns_from_query(sql) -%}
-   /*{# Returns the column list from a given sql query
-	ARGS:
-  	  - sql (string) the sql to query.
-        RETURNS: list of column names
-   #}*/
-    {% set stub_sql %}
-	WITH __dbt_kimball_dimensional_stub AS (
-	 {{ sql }} 
-	)
-	SELECT * FROM __dbt_kimball_dimensional_stub LIMIT 1
-    {% endset %}
-    {% set structure = run_query(stub_sql) %}
-    {{ return((structure.column_names,structure.column_types,)) }}
-{%- endmacro -%}

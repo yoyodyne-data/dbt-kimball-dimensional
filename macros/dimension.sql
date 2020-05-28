@@ -13,6 +13,7 @@
     {% set existing_relation = load_relation(this) %}
 
     {% set CDC = config.require('change_data_capture') %}
+    {% set DNI = config.require('durable_natural_id') %}
 
     {%- set target_columns = kimball._kimball_get_columns(existing_relation,sql,config.get('type_10',default=[])) -%}
     {% for col in target_columns %}
@@ -24,9 +25,9 @@
     
     {% set config_args= {
               "sql" : sql,
-              "dim_key" : this.table ~ '_key',
-              "dim_id" : this.table ~ '_id',
-              "DNI" : config.require('durable_natural_id'),
+              "dim_key" : this.table | lower ~ '_key',
+              "dim_id" : this.table | lower ~ '_id',
+              "DNI" : DNI,
               "CDC" : CDC,
               "cdc_data_type" : cdc_data_type,
               "full_refresh" : flags.FULL_REFRESH,
@@ -81,6 +82,11 @@
         {% endcall %}
 
     {% endif %}
+
+  -- add meta to staging table
+  {% call statement('meta') %}
+    {{ kimball._kimball_insert_dimension_meta(this.table, CDC, DNI) }}
+  {% endcall %}
 
   {% do adapter.commit() %}
   {{ run_hooks(post_hooks) }}

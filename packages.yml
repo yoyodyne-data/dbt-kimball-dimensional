@@ -1,3 +1,3 @@
 packages:
   - git: "https://github.com/Health-Union/dbt-xdb.git"
-    revision: 0.1.2
+    revision: 0.1.3

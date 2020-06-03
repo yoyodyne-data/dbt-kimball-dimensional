@@ -1,18 +1,4 @@
-batched_at,user_id,first_name,last_name,email,phone_number,preferred_status,account_created_at,birthdate
-2020-01-02 10:15:12,12348,Newton,Nethercott,nnethercott0@fc2.com,308-261-7168,FALSE,2018-03-19 17:55:00,5/31/1991
-2020-01-02 10:15:13,19999,Gwendolen,Dobbson,gdobbson1@51.la,555-203-2222,TRUE,2019-07-17 19:10:12,2/22/1920
-2020-01-02 10:15:13,12560,Melissa,Bonnavant,mbonnavant2@stevedegele.com,602-838-9990,FALSE,2019-12-29 23:39:38,2/4/1984
-2020-01-01 1:35:10,12121,Chadd,Bettenay,cbettenay3@unicef.org,248-195-7305,TRUE,2019-09-25 0:41:35,5/3/1969
-2020-01-01 1:35:10,11111,Josephina,Twist,jtwist4@cbsnews.com,113-169-0115,FALSE,2019-07-05 2:56:55,4/14/1992
-2020-01-01 1:35:10,12569,Tabbatha,Kurt,tkurt5@deviantart.com,121-529-5100,TRUE,2019-09-15 18:16:49,5/28/1976
-2020-01-01 1:35:10,19821,Reggie,Caunt,rcaunt6@tiny.cc,459-139-1439,TRUE,2019-11-03 15:44:22,NULL
-2020-01-01 1:35:10,19811,Ertha,Badwick,ebadwick7@ning.com,290-215-5216,TRUE,2020-05-12 11:35:01,8/12/1840
-2020-01-01 1:35:10,19801,Lorelei,Michelet,lmichelet8@who.int,456-139-8458,FALSE,2019-06-24 13:20:59,11/21/2019
-2020-01-01 1:35:10,19342,Violette,Lane,vlane9@phpbb.com,443-374-5739,TRUE,2019-05-18 17:21:55,1/14/1981
-2020-01-02 10:15:13,99901,Egor,Francioli,efrancioli0@smh.com.au,369-504-6808,TRUE,2020-04-04 6:54:35,6/2/2019
-2020-01-02 10:15:13,84594,Caryl,Chamberlen,cchamberlen1@aol.com,237-281-7991,FALSE,2019-06-29 22:15:23,3/12/2020
-2020-01-02 10:15:12,84595,Gearard,Minihan,gminihan2@phpbb.com,437-967-5138,FALSE,2019-10-06 19:44:43,9/24/2019
-2020-01-02 10:15:12,84596,Justen,NULL,jdust3@ted.com,NULL,FALSE,2019-12-18 9:55:00,NULL
-2020-01-02 10:15:12,84597,Morty,Corryer,mcorryer4@chicagotribune.com,234-153-4312,FALSE,2019-05-20 5:02:38,9/22/2019
-2020-01-02 10:15:12,84598,Amanda,Michelet,Amichelet@who.int,456-139-8458,FALSE,2019-06-24 13:20:59,NULL
-2020-01-02 10:15:12,84599,Violette,Lane,vlane9@slag.org,201-299-3627,TRUE,2019-05-18 17:21:55,1/14/2020
+updated_at,user_id,first_name,last_name,email,phone,birthday,preferred_customer,created_at,first_logged_in_at,current_email_status
+2020-01-02 11:12:10,12345,Bob,Jones,bob@socks.com,555-222-1234,1965-02-01,FALSE,2019-12-11 12:32:10,2020-01-01 10:14:12,SUBSCRIBED
+2020-01-02 14:01:10,12346,Sarah,Degele,sarah@otherthing.com,222-324-5432,1981-01-02,TRUE,2020-01-01 1:13:05,2020-01-01 1:15:00,UNSUBSCRIBED
+2020-01-02 10:55:01,123457,John,Wayne,theduke@cowboy.com,999-222-5432,1907-05-26,FALSE,2019-12-29 11:45:24,2020-01-02 10:01:01,SUBSCRIBED

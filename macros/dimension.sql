@@ -14,8 +14,13 @@
 
     {% set CDC = config.require('change_data_capture') %}
     {% set DNI = config.require('durable_natural_id') %}
+    {% set full_refresh = flags.FULL_REFRESH %}
 
-    {%- set target_columns = kimball._kimball_get_columns(existing_relation,sql,config.get('type_10',default=[])) -%}
+    {% if full_refresh or existing_relation is none %}
+        {% set target_columns = kimball._kimball_get_columns_from_query(sql) %}
+    {% else %}
+        {% set target_columns = kimball._kimball_get_columns_from_existing(existing_relation,config.get('type_10',default=[])) %}
+    {% endif %}
     {% for col in target_columns %}
         {% if col['name'] == CDC %}
             {% set cdc_data_type = col['data_type'] %}

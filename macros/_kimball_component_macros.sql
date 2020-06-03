@@ -1,51 +1,58 @@
-{%- macro _kimball_get_columns(existing_relation,sql,type_10_columns) -%}
+{%- macro _kimball_get_columns_from_query(sql) -%}
+    /*{# gets the column names and datatypes from the model sql.
+        ARGS:
+            - sql (string) the base sql statement from the model.
+        RETURNS: a list of dicts with column name and data type.
+    #}*/
+        {% set columns = [] %}
+        {% set stub_sql %}
+        WITH __dbt_kimball_dimensional_stub AS (
+         {{ sql }} 
+        )
+        SELECT * FROM __dbt_kimball_dimensional_stub LIMIT 1
+        {% endset %}
+        {% set structure = run_query(stub_sql) %}
+        {% for col in structure.columns %}
+            {% set dtype = 'time' if 'DateTime' in col.data_type | string 
+                           else 'date' if 'Date' in col.data_type | string 
+                           else 'number' if 'Number' in col.data_type | string 
+                           else 'text' %}
+            {% do columns.append({"name":col.name,
+                                   "data_type": dtype}) %} 
+        {% endfor %}
+        {{ return(columns) }}
+
+{%- endmacro -%}
+
+{%- macro _kimball_get_columns_from_existing(existing_relation,type_10_columns) -%}
     /*{# gets the column names and datatypes for the target table.
         ARGS:
-            - existing_relation (Relation, None) the DBT relation object if the relation already exists or none if it does not.
-            - sql (string) the base sql statement from the model.
+            - existing_relation (Relation) the DBT relation object.
             - type_10_columns (list) the columns that will have type 10 materializations.
         RETURNS: a list of dicts with column name and data type.
     #}*/
         {% set columns = [] %}
-        {% if existing_realtion is none %}
-            {% set stub_sql %}
-            WITH __dbt_kimball_dimensional_stub AS (
-             {{ sql }} 
-            )
-            SELECT * FROM __dbt_kimball_dimensional_stub LIMIT 1
-            {% endset %}
-            {% set structure = run_query(stub_sql) %}
-            {% for col in structure.columns %}
-                {% set dtype = 'time' if 'DateTime' in col.data_type | string 
-                               else 'date' if 'Date' in col.data_type | string 
-                               else 'number' if 'Number' in col.data_type | string 
-                               else 'text' %}
+        {% set type_10_column_exclusions = [] %}
+        {% for col in type_10_columns %}
+            {% do type_10_column_exclusions.append('all_' ~ col | lower ~'_values') %}
+        {% endfor %}
+        {% set existing_columns = adapter.get_columns_in_relation(existing_relation) %}
+        {% for col in existing_columns %}
+            {% if col.name |lower not in ['row_effective_at',
+                                 'row_expired_at',
+                                 'row_is_current',
+                                  this.table | lower ~ '_key',
+                                  this.table | lower ~ '_id',] + type_10_column_exclusions %}
+            {% set dtype = 'time' if 'timestamp' in col.dtype | string  
+                           else 'date' if 'date' in col.dtype | string 
+                           else 'number' if 'integer' in col.dtype | string 
+                           else 'number' if 'float' in col.dtype | string 
+                           else 'number' if 'numeric' in col.dtype | string 
+                           else 'text' %}
                 {% do columns.append({"name":col.name,
-                                       "data_type": dtype}) %} 
-            {% endfor %}
-        {% else %}
-            {% set type_10_column_exclusions = [] %}
-            {% for col in type_10_columns %}
-                {% do type_10_column_exclusions.append('all_' ~ col | lower ~'_values') %}
-            {% endfor %}
-            {% set existing_columns = adapter.get_columns_in_relation(existing_relation) %}
-            {% for col in existing_columns %}
-                {% if col.name |lower not in ['row_effective_at',
-                                     'row_expired_at',
-                                     'row_is_current',
-                                      this.table | lower ~ '_key',
-                                      this.table | lower ~ '_id',] + type_10_column_exclusions %}
-                {% set dtype = 'time' if 'timestamp' in col.dtype | string  
-                               else 'date' if 'date' in col.dtype | string 
-                               else 'number' if 'integer' in col.dtype | string 
-                               else 'number' if 'float' in col.dtype | string 
-                               else 'number' if 'numeric' in col.dtype | string 
-                               else 'text' %}
-                    {% do columns.append({"name":col.name,
-                                          "data_type":dtype}) %}
-                {% endif %}
-            {% endfor %}
-        {% endif %}
+                                      "data_type":dtype}) %}
+            {% endif %}
+        {% endfor %}
         {{ return(columns) }}
 
 {%- endmacro -%}

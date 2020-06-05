@@ -1,5 +1,16 @@
 {%- materialization fact, default -%}
+    {% if config.get('lookback_window') is none %}
+        {{ kimball._simple_fact() }}
+    {% elif config.get('unique_expression') is none %}
+        {{ kimball._complex_fact() }}
+    {% else %}
+        {{ kimball._accumulating_fact() }}
+    {% endif %}
 
+{% endmaterialization %}
+
+
+{% macro _simple_fact() %}
     {% set model_dni = config.get('durable_natural_id_column', default='NULL') %}
     {% set model_instance_at = config.get('instance_at_column', default='NULL') %}
 
@@ -54,7 +65,7 @@
     {% do adapter.commit() %}
     {{ run_hooks(post_hooks) }}
 
-{%- endmaterialization -%}
+{% endmacro %}
 
 {%- macro _dbt_kimball_dim_key_helper(dim)  -%}
     _dbt_kimball_{{ xdb.fold(dim) | trim }}_key_lookup

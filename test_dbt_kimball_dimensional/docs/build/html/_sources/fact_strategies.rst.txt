@@ -4,6 +4,17 @@ Fact Strategies
 
 Kimball facts can take on several forms, depending on the nature of the data in question. 
 
+To make life easier, this package uses `fuction overloading <https://en.wikipedia.org/wiki/Function_overloading>`_ to identify and 
+execute the correct version of Fact for your use case. 
+
+.. Hint::
+   The *fact type* used is determined by the arguments you pass to **config**:
+   
+   - **Accumulating Fact** will be used if the ``unique_expression`` and ``lookback_window`` args are present.
+   - **Complex Fact** will be used if just the ``lookback_window`` arg is present.
+   - **Simple Fact** will be used if these are both absent. 
+
+
 Simple Facts
 ============
 

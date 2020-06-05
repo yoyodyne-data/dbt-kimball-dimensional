@@ -154,6 +154,17 @@
   <div class="section" id="fact-strategies">
 <h1>Fact Strategies<a class="headerlink" href="#fact-strategies" title="Permalink to this headline">¶</a></h1>
 <p>Kimball facts can take on several forms, depending on the nature of the data in question.</p>
+<p>To make life easier, this package uses <a class="reference external" href="https://en.wikipedia.org/wiki/Function_overloading">fuction overloading</a> to identify and
+execute the correct version of Fact for your use case.</p>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
+<p>The <em>fact type</em> used is determined by the arguments you pass to <strong>config</strong>:</p>
+<ul class="simple">
+<li><p><strong>Accumulating Fact</strong> will be used if the <code class="docutils literal notranslate"><span class="pre">unique_expression</span></code> and <code class="docutils literal notranslate"><span class="pre">lookback_window</span></code> args are present.</p></li>
+<li><p><strong>Complex Fact</strong> will be used if just the <code class="docutils literal notranslate"><span class="pre">lookback_window</span></code> arg is present.</p></li>
+<li><p><strong>Simple Fact</strong> will be used if these are both absent.</p></li>
+</ul>
+</div>
 <div class="section" id="simple-facts">
 <h2>Simple Facts<a class="headerlink" href="#simple-facts" title="Permalink to this headline">¶</a></h2>
 <table class="docutils align-default">

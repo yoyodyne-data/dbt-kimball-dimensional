@@ -1,2 +1,4 @@
 dbt==0.17.0rc1
 pytest
+sphinx==3.0.4
+sphinx_rtd_theme==0.4.3

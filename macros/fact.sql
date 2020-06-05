@@ -72,7 +72,7 @@
         Returns:
             partial: a sql string that converts ``column`` to a dim_date key.
     #}*/
-    TO_CHAR({{ column }}, '%Y%m%d')
+    TO_CHAR({{ column }}, 'YYYYmmdd')
 {%-  endmacro -%}
 
 {%- macro dim_key(dim, alias=none, dni_column=none, instance_at_column=none) -%}

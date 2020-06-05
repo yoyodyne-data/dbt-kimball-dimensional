@@ -1,0 +1,315 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Fact Strategies &mdash; dbt-kimball-dimensional 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to dbt-kimball-dimensional’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> dbt-kimball-dimensional
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Fact Strategies</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#simple-facts">Simple Facts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#complex-facts">Complex Facts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accumulating-facts">Accumulating Facts</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">dbt-kimball-dimensional</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Fact Strategies</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/fact_strategies.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fact-strategies">
+<h1>Fact Strategies<a class="headerlink" href="#fact-strategies" title="Permalink to this headline">¶</a></h1>
+<p>Kimball facts can take on several forms, depending on the nature of the data in question.</p>
+<div class="section" id="simple-facts">
+<h2>Simple Facts<a class="headerlink" href="#simple-facts" title="Permalink to this headline">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 86%" />
+<col style="width: 14%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>uniquely_keyed</strong></p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>mutable</strong></p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>late-arriving-fact</strong></p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>late-arriving-dim</strong></p></td>
+<td><p>No</p></td>
+</tr>
+</tbody>
+</table>
+<p>Simple facts are, as the name suggests, very simple.</p>
+<p><strong>Key Differentiators of a Simple Fact</strong></p>
+<ul class="simple">
+<li><p>For every occurance of a simple fact record, a new fact row is created.</p></li>
+<li><p>Records are added to the source data in chronological order; that is, an event occuring on January 1, 2020 will always appear in the source data before an event occurring on January 10, 2020.</p></li>
+<li><p>Simple facts never change - like a web event that is recorded once and never modified.</p></li>
+<li><p>Simple facts arrive at the same time or after their associated dims.</p></li>
+<li><p>Because simple facts are so simple, they do not require unique keys - so 3 identical fact records will be recorded as 3 distinct fact instances.</p></li>
+</ul>
+</div>
+<div class="section" id="complex-facts">
+<h2>Complex Facts<a class="headerlink" href="#complex-facts" title="Permalink to this headline">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 83%" />
+<col style="width: 17%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>uniquely_keyed</strong></p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>mutable</strong></p></td>
+<td><p>No</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>late-arriving-fact</strong></p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>late-arriving-dim</strong></p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+<p>Complex facts add the ability to deal with EL and process complexity.</p>
+<p><strong>Key Differentiators of a Complex Fact</strong></p>
+<ul class="simple">
+<li><p>For every occurance of a complex fact record, a new fact row is created.</p></li>
+<li><p>Because complex facts allow for late-arriving records, a <code class="docutils literal notranslate"><span class="pre">lookback_window</span></code> is required; this window determines how far back DBT should look.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">lookback_window</span></code> applies to both late-arriving dims and facts.</p></li>
+<li><p>A lookback of <code class="docutils literal notranslate"><span class="pre">0</span></code> indicates no lookback (in which case a <a class="reference external" href="SimpleFacts">Simple Fact</a> can likely be used). In this manner, a model with a lookback of <code class="docutils literal notranslate"><span class="pre">5</span></code> will correctly handle a fact occurring on January 1st, 2020 if it arrives on or before January 6th, 2020.
+Complex facts support late-arriving dims; this means a fact may have a dim value of <code class="docutils literal notranslate"><span class="pre">-1</span></code> (the <code class="docutils literal notranslate"><span class="pre">N/A</span></code> dim) until the correct dim arrives.</p></li>
+<li><p>Note that if the late dim arrives after the lookback window it will not be updated.</p></li>
+<li><p>A lookback of <code class="docutils literal notranslate"><span class="pre">all</span></code> will instruct DBT to scan the entire fact table for updates on each build; this is very powerful
+but can also become very costly.</p></li>
+<li><p>While a resulting fact record may update over time to accommodate late arriving dims, the fact itself does not change.</p></li>
+<li><p>Complex facts use the hashed value of non-dim-key attributes to determine uniqueness, so they do not require an explicit unique key.</p></li>
+</ul>
+</div>
+<div class="section" id="accumulating-facts">
+<h2>Accumulating Facts<a class="headerlink" href="#accumulating-facts" title="Permalink to this headline">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 83%" />
+<col style="width: 17%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>uniquely_keyed</strong></p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>mutable</strong></p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>late-arriving-fact</strong></p></td>
+<td><p>Yes</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>late-arriving-dim</strong></p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+<p>Accumulating facts emulate <a class="reference external" href="https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/accumulating-snapshot-fact-table/">Kimball Accumulating Snapashots</a>.
+These facts are the most complex of the fact materializations, and allow for fact records to create historical breadcrumbs from
+sequential events.</p>
+<p><strong>Key Differentiators of an Accumulating Fact</strong></p>
+<ul class="simple">
+<li><p>For every occurance of a newly unique fact record, a new fact row is created.</p></li>
+<li><p>Because accumulating facts allow for late-arriving records <em>and</em> “trickling-in” components to current records, a <code class="docutils literal notranslate"><span class="pre">lookback_window</span></code> is required; this window determines how far back DBT should look.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">lookback_window</span></code> applies to both late-arriving dims and facts as well as the “closing” of accumulations.</p></li>
+<li><p>Records who’s occurance timeline has passed the lookback window become “closed”; these records are now considered immutable and will behave as such.</p></li>
+<li><p>A lookback of <code class="docutils literal notranslate"><span class="pre">0</span></code> indicates no lookback (in which case a <a class="reference external" href="SimpleFacts">Simple Fact</a> can likely be used). In this manner, a model with a lookback of <code class="docutils literal notranslate"><span class="pre">5</span></code> will correctly handle a fact occurring on January 1st, 2020 if it arrives on or before January 6th, 2020.</p></li>
+<li><p>Accumulating facts support late-arriving dims; this means a fact may have a dim value of <code class="docutils literal notranslate"><span class="pre">-1</span></code> (the <code class="docutils literal notranslate"><span class="pre">N/A</span></code> dim) until the correct dim arrives.</p></li>
+<li><p>Note that if the late dim arrives after the lookback window it will not be updated.</p></li>
+<li><p>A lookback of <code class="docutils literal notranslate"><span class="pre">all</span></code> will instruct DBT to scan the entire fact table for updates on each build; this is very powerful
+but can also become very costly. This also means the resulting records will never “close”.</p></li>
+<li><p>Accumulating facts retain their initial values but are mutable in an <em>additive fashion</em>; that is, marker values like <code class="docutils literal notranslate"><span class="pre">shipped_at</span></code> and <code class="docutils literal notranslate"><span class="pre">delivered_at</span></code> can move from <code class="docutils literal notranslate"><span class="pre">NULL</span></code> to a valid value
+during the lookback window.</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to dbt-kimball-dimensional’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ethan Knox
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

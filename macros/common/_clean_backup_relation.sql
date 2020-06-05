@@ -10,9 +10,9 @@
     #}*/
     {% set backup_relation = existing.incorporate(
            path={"identifier": target.identifier ~ "__dbt_kimball_backup"} ) %}
-    {% if load_relation(backup) is not none %}
-        {% do adapter.drop_relation(backup) %}
+    {% if load_relation(backup_relation) is not none %}
+        {% do adapter.drop_relation(backup_relation) %}
     {% endif %}
-    {% do adapter.rename_relation(target, backup) %}
-    {{ return(backup) }}
+    {% do adapter.rename_relation(target, backup_relation) %}
+    {{ return(backup_relation) }}
 {% endmacro %}

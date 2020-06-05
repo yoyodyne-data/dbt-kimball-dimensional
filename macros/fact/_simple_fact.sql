@@ -16,9 +16,9 @@
                                kimball._build_kimball_fact(sql, required_dims)) }}
         {% endcall %}
 
-    {% elif config_args["full_refresh"] %}
+    {% elif full_refresh %}
         {% do relations_to_drop.append( kimball._clean_backup_relation(target_relation,
-                                                                       backup_relation) ) %}
+                                                                       existing_relation) ) %}
         {% call statement('main') %}
             {{ create_table_as(False,
                                target_relation,

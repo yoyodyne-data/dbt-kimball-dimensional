@@ -5,15 +5,25 @@ Fact Strategies
 Kimball facts can take on several forms, depending on the nature of the data in question. 
 
 To make life easier, this package uses `fuction overloading <https://en.wikipedia.org/wiki/Function_overloading>`_ to identify and 
-execute the correct version of Fact for your use case. 
+execute the correct Fact properties for your use case. 
+
+Accumulating Properties
+-----------------------
+
+Accumulating properties are an implementation of `Kimball Accumulating Snapashots <https://www.kimballgroup.com/data-warehouse-business-intelligence-resources/kimball-techniques/dimensional-modeling-techniques/accumulating-snapshot-fact-table/>`_.
+When facts represent a progressive (or "accumulating") population of milestones, these properties mutate throughout the lookback window of the fact. This 
+period. Once the lookback window has passed the record is "closed" and can be treated as a static fact.  
+
 
 .. Hint::
-   The *fact type* used is determined by the arguments you pass to **config**:
+   The *fact properites* used are determined by the arguments you pass to **config**:
    
-   - **Accumulating Fact** will be used if the ``unique_expression`` and ``lookback_window`` args are present.
-   - **Complex Fact** will be used if just the ``lookback_window`` arg is present.
-   - **Simple Fact** will be used if these are both absent. 
-
+   - If ``unique_expression`` *and* ``lookback_window`` are defined, DBT will attempt to update both the accumulating properties
+     and the late-arriving dimensional keys for all records within the specified window. 
+   - If ``lookback_window`` is specified without ``unique_expression``, DBT will *only* attempt to update the late-arriving dimension keys 
+     for all records within the specified window.
+   - If ``unique_expression`` is specified without ``lookback_window``, DBT will raise a warning and will proceed with a simple incrementing fact.
+   - If neither argument is specified DBT will proceed with a simple implementing fact.  
 
 Simple Facts
 ============

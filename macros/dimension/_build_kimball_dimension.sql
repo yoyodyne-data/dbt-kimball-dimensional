@@ -1,6 +1,5 @@
 {%- macro _build_kimball_dimension(config_args) -%}
 
-
     {%- set array_columns = config_args['type_10_columns'] -%}
     {%- set incremental = ( not config_args['full_refresh'] and config_args['existing_relation'] is not none ) -%}
     

@@ -17,9 +17,10 @@
     {% set full_refresh = flags.FULL_REFRESH %}
 
     {% if full_refresh or existing_relation is none %}
-        {% set target_columns = kimball._kimball_get_columns_from_query(sql) %}
+        {% set target_columns = kimball.get_columns_from_query(sql) %}
     {% else %}
-        {% set target_columns = kimball._kimball_get_columns_from_existing(existing_relation,config.get('type_10',default=[])) %}
+        {% set target_columns = kimball._get_redacted_dim_columns(existing_relation,
+                                                                  config.get('type_10',default=[])) %}
     {% endif %}
     {% for col in target_columns %}
         {% if col['name'] == CDC %}

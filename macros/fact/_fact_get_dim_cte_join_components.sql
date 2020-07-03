@@ -5,8 +5,8 @@
         Returns:
             list : a list of row tuples for the required dims. 
     #}*/
-    {% set model_dni = config.get('durable_natural_id_column', default='NULL') %}
-    {% set model_instance_at = config.get('instance_at_column', default='NULL') %}
+    {% set model_dni = config.get('durable_natural_id', default='NULL') %}
+    {% set model_instance_at = config.get('instance_at', default='NULL') %}
 
     {% call statement('dim_cte_meta', fetch_result=True, auto_begin=False) %}
         SELECT 

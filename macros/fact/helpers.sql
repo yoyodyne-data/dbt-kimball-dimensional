@@ -2,8 +2,6 @@
     _dbt_kimball_{{ xdb.fold(dim) | trim }}_key_lookup
 {%- endmacro -%}
 
-
-
 {%- macro dim_date_key(column) -%}
     /*{# Less expensive magic for dim_dates.
     

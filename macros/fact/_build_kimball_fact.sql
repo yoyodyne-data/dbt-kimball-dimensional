@@ -1,15 +1,14 @@
-{% macro _build_kimball_fact(sql, required_dims ) %}
+{% macro _build_kimball_fact( config_args ) %}
     /*{# The workhorse query builder for fact tables.
         Appends and injects each required dim key and CTE. 
         
-        Args: 
-            sql (sql) : the model sql statement.
-            required_dims (list) a collection of dimensional tuples to be converted to CTEs.
+        Args:
+            config_args (dict) : the configuration dictionary for facts.
         Returns:
             sql : a valid statement for CTAS.
     #}*/
-        {{ sql }}
-        {% for dim in required_dims %}
+        {{ config_args["sql"] }}
+        {% for dim in config_args["required_dims"] %}
         {% set dimension, instance_at, dni = dim %}
         JOIN
             (SELECT 
